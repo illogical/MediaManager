@@ -1,41 +1,492 @@
 # MediaManager Project Tasks
 
-## Phase 1: UI Foundations & Core Viewer
-- [ ] Initialize project with global CSS theme (`src/main.css`).
-    - [ ] Define color palette and glassmorphism variables.
-    - [ ] Reset and utility styles.
-- [ ] Create UI Shell (`index.html`).
-    - [ ] Basic structure for Overlay, Nav, and Main content.
-- [ ] Implement UI Overlay Logic (`src/components/UIOverlay.ts`).
-    - [ ] Toggle Top/Left bars on background click.
-- [ ] Build Thumbnail Grid (`src/components/ThumbnailGrid.ts`).
-    - [ ] Responsive grid with placeholder cards.
-- [ ] Build Single Media View (`src/components/SingleMediaView.ts`).
-    - [ ] Fit-to-window aspect ratio logic.
-    - [ ] Manual zoom placeholder (scroll wheel).
-- [ ] Build Carousel Component (`src/components/Carousel.ts`).
-    - [ ] Horizontal scroll/drag behavior.
+## Phase 0: Specification & Planning
+- [ ] Document tech stack in SPECIFICATION.md
+    - [ ] Vanilla HTML, CSS, TypeScript via Vite for frontend
+    - [ ] Bun.js backend with SQLite database
+    - [ ] Server-side filesystem access with REST API
+- [ ] Complete database schema in SPECIFICATION.md
+    - [ ] Add all table definitions with fields, types, and constraints
+    - [ ] MediaFiles: Add fields for file_size, width, height, mime_type, created_date, file_hash
+    - [ ] Add indexes: folder_path, last_viewed, like_count, view_count
+    - [ ] Clarify like_count as integer: negative=dislike (-1), zero=undecided (0), positive=like count
+    - [ ] Create Folders table for folder metadata
+    - [ ] Create Tags table for tag definitions
+    - [ ] Create MediaTags junction table for many-to-many relationship
+    - [ ] Create RandomizationSessions table for serializing random order
+    - [ ] Create Config table for app-wide settings
+    - [ ] Add compound indexes and foreign key constraints
+- [ ] Document complete API contract in SPECIFICATION.md
+    - [ ] Define all REST endpoints with HTTP methods
+    - [ ] Specify request/response formats (JSON schemas)
+    - [ ] Document error response structure and status codes
+    - [ ] Add authentication/CORS policy if needed
+    - [ ] Endpoint: GET /api/folders - List configured folders
+    - [ ] Endpoint: GET /api/media?folder=&type=&tags=&sort= - Get filtered media
+    - [ ] Endpoint: GET /api/media/:id - Get single media with metadata
+    - [ ] Endpoint: POST /api/media/:id/view - Increment view count
+    - [ ] Endpoint: POST /api/media/:id/like - Increment like count
+    - [ ] Endpoint: POST /api/media/:id/dislike - Set like_count to -1
+    - [ ] Endpoint: GET /api/tags - List all tags with usage counts
+    - [ ] Endpoint: POST /api/media/:id/tags - Add tag to media
+    - [ ] Endpoint: DELETE /api/media/:id/tags/:tag - Remove tag from media
+    - [ ] Endpoint: GET /api/history - Get last 20 viewed items
+    - [ ] Endpoint: GET /api/randomize - Get randomized media list with session
+    - [ ] Endpoint: POST /api/playlists - Create/update playlist
+    - [ ] Endpoint: GET /api/playlists/:id - Get playlist with media order
+    - [ ] Endpoint: DELETE /api/media/disliked - Bulk move disliked files
+    - [ ] Endpoint: POST /api/scan - Trigger manual folder scan
+- [ ] Document localStorage schema in SPECIFICATION.md
+    - [ ] Current session state structure
+    - [ ] Last viewed media reference
+    - [ ] UI preferences (overlay visible, grid density)
+- [ ] Add UX workflow documentation to DESIGN.md
+    - [ ] Onboarding flow for first-time user
+    - [ ] Empty state designs (no folders, no media, all filtered)
+    - [ ] Error state handling and user feedback
+    - [ ] Loading states for each view
+- [ ] Define keyboard shortcuts in DESIGN.md
+    - [ ] Arrow Left/Right: Previous/Next media
+    - [ ] Space: Toggle UI overlay
+    - [ ] L: Like current media
+    - [ ] D: Dislike current media
+    - [ ] T: Open tag dialog
+    - [ ] G: Return to grid view
+    - [ ] Escape: Close dialogs/return to previous view
+    - [ ] Plus/Minus: Zoom in/out
+    - [ ] 0: Reset zoom to fit
+- [ ] Document like/dislike button behavior in SPECIFICATION.md
+    - [ ] Like button: Increments like_count (0→1→2→3...)
+    - [ ] Dislike button: Sets like_count to -1 regardless of current value
+    - [ ] Visual feedback: Show current like_count on button
+    - [ ] Keyboard shortcuts for quick marking
+- [ ] Plan video player requirements (placeholder for Phase 6)
+    - [ ] Target formats: MP4 (primary), WebM, MOV
+    - [ ] Research HTML5 video element capabilities
+    - [ ] Decide on native controls vs custom controls
+    - [ ] Plan video-specific UI (play/pause, seek bar, volume)
+    - [ ] Document autoplay policy and user preferences
+- [ ] Plan video thumbnail generation strategy
+    - [ ] Research server-side options (ffmpeg, sharp)
+    - [ ] Define thumbnail size/quality standards (e.g., 300x200, JPEG quality 80)
+    - [ ] Document caching strategy (filesystem cache vs database blob)
+    - [ ] Consider lazy generation vs pre-generation on scan
+    - [ ] Plan cache invalidation and size limits
+- [ ] Add Future Considerations section to SPECIFICATION.md
+    - [ ] Performance: Virtual scrolling for 1000+ item grids
+    - [ ] Performance: Database query optimization strategies
+    - [ ] Performance: Thumbnail lazy loading and preloading strategies
+    - [ ] Performance: Consider pagination limits for very large folders
+    - [ ] VR Support: Low priority, rely on standard virtual browser interactions
+    - [ ] Multi-device sync considerations
+    - [ ] Advanced features: Smart collections, batch operations, search
+- [ ] Add accessibility requirements to DESIGN.md
+    - [ ] ARIA labels and roles for all interactive elements
+    - [ ] Keyboard focus management and visible focus indicators
+    - [ ] Screen reader announcements for view changes
+    - [ ] Alt text strategy (use filename or tags)
+    - [ ] Support for prefers-reduced-motion
+    - [ ] High contrast mode support
+
+## Phase 1: UI Foundations & Core Viewer (Images Only)
+- [ ] Initialize Vite project with TypeScript
+    - [ ] Run `npm create vite@latest` with TypeScript template
+    - [ ] Configure `tsconfig.json` for strict mode
+    - [ ] Setup project structure (src/components, src/lib, src/types)
+    - [ ] Install development dependencies
+- [ ] Initialize project with global CSS theme (`src/main.css`)
+    - [ ] Define CSS custom properties for color palette
+    - [ ] HSL color scheme based on DESIGN.md
+    - [ ] Glassmorphism variables (backdrop-blur, opacity)
+    - [ ] Reset and utility styles (box-sizing, margins)
+    - [ ] Responsive typography scale
+- [ ] Create UI Shell (`index.html`)
+    - [ ] Basic HTML5 structure with semantic elements
+    - [ ] Container divs for Overlay, Nav, and Main content
+    - [ ] Link to main.css and main.ts
+    - [ ] Meta tags for viewport and description
+- [ ] Implement UI Overlay Logic (`src/components/UIOverlay.ts`)
+    - [ ] Create TypeScript class for overlay management
+    - [ ] Toggle Top/Left bars on background click
+    - [ ] Implement keyboard shortcut (Space key) for toggle
+    - [ ] Smooth slide-in/slide-out animations
+    - [ ] Handle click-through to prevent toggling on interactive elements
+- [ ] Build Thumbnail Grid (`src/components/ThumbnailGrid.ts`)
+    - [ ] Responsive CSS Grid layout (`auto-fill, minmax`)
+    - [ ] Placeholder cards with skeleton loading state
+    - [ ] Empty state display ("No media found")
+    - [ ] Hover effects (scale-up, border highlight)
+    - [ ] Click handler to open single view
+- [ ] Build Single Media View (`src/components/SingleMediaView.ts`)
+    - [ ] Fit-to-window aspect ratio logic
+    - [ ] Calculate portrait vs landscape orientation
+    - [ ] Manual zoom with scroll wheel (increment/decrement scale)
+    - [ ] Pan when zoomed in (click and drag to move)
+    - [ ] Zoom reset button/shortcut (0 key)
+    - [ ] Display current like count indicator
+    - [ ] Window resize handler to recalculate fit
+- [ ] Build Carousel Component (`src/components/Carousel.ts`)
+    - [ ] Horizontal scroll container with overflow-x
+    - [ ] Thumbnail preview generation
+    - [ ] Click-and-drag behavior (mouse events)
+    - [ ] Touch swipe support (touch events)
+    - [ ] Scroll wheel horizontal translation
+    - [ ] Active item indicator
+- [ ] Implement keyboard navigation
+    - [ ] Arrow Left/Right for previous/next
+    - [ ] Space for toggle overlay
+    - [ ] L for like, D for dislike
+    - [ ] G for grid view, Escape for back
+    - [ ] Plus/Minus and 0 for zoom controls
+    - [ ] Event listener management and cleanup
+- [ ] Create TypeScript type definitions (`src/types/index.ts`)
+    - [ ] MediaFile interface
+    - [ ] Tag interface
+    - [ ] ViewHistoryEntry interface
+    - [ ] Playlist interface
+    - [ ] SessionState interface
+    - [ ] FilterOptions interface
 
 ## Phase 2: Interactivity & Mock Persistence
-- [ ] Implement `localStorage` handler for view history/likes.
-- [ ] Add basic Like/Dislike/Tagging buttons to the Top Bar.
-- [ ] Implement "Previous/Next" navigation logic.
-- [ ] Support Mouse Scroll Wheel horizontal scrolling for Carousel.
+- [ ] Create mock data generator (`src/lib/mockData.ts`)
+    - [ ] Generate sample MediaFile objects
+    - [ ] Generate sample tags
+    - [ ] Generate sample view history
+    - [ ] Realistic filenames and paths
+- [ ] Implement localStorage handler (`src/lib/storage.ts`)
+    - [ ] Follow defined localStorage schema
+    - [ ] Session state persistence (get/set/clear)
+    - [ ] UI preferences persistence
+    - [ ] Mock data storage for development
+    - [ ] Error handling for quota exceeded
+- [ ] Add Like/Dislike/Tagging buttons to Top Bar
+    - [ ] Like button: Increment like_count with visual feedback
+    - [ ] Dislike button: Set like_count to -1
+    - [ ] Display current like_count value with icon
+    - [ ] Tag button opens tag autocomplete dialog
+    - [ ] Keyboard shortcuts (L, D, T keys)
+    - [ ] Update localStorage on action
+- [ ] Implement Tag Autocomplete Dialog (`src/components/TagDialog.ts`)
+    - [ ] Modal dialog with input field
+    - [ ] Fuzzy search existing tags as user types
+    - [ ] Show tag usage count in dropdown
+    - [ ] Create new tag on-the-fly if not exists
+    - [ ] Multi-tag selection support
+    - [ ] Close on Escape or outside click
+- [ ] Implement "Previous/Next" navigation logic
+    - [ ] Track current index in media array
+    - [ ] Wrap around at boundaries (optional)
+    - [ ] Update view count and last_viewed timestamp
+    - [ ] Preload next/previous images for smooth transition
+    - [ ] Update URL hash for deep linking
+- [ ] Support Mouse Scroll Wheel horizontal scrolling for Carousel
+    - [ ] Capture wheel event on carousel container
+    - [ ] Translate vertical scroll to horizontal
+    - [ ] Smooth scroll behavior
+    - [ ] Prevent page scroll when over carousel
 
 ## Phase 3: Selection & Filtering
-- [ ] Implement Left Sidebar content:
-    - [ ] Folder selection mockup.
-    - [ ] Tag selection cloud mockup.
-- [ ] Decide and implement Filter Menu placement.
-- [ ] Basic View History display.
+- [ ] Implement Left Sidebar component (`src/components/LeftSidebar.ts`)
+    - [ ] Folder selection from mock configured folders
+    - [ ] Tag cloud with click to filter
+    - [ ] Media type filter (images only for now)
+    - [ ] Like/Dislike/Unviewed filter toggles
+    - [ ] Collapsible sections
+- [ ] Implement Filter logic (`src/lib/filtering.ts`)
+    - [ ] Filter by folder path
+    - [ ] Filter by tags (AND/OR logic)
+    - [ ] Filter by like status (liked/disliked/undecided)
+    - [ ] Filter by viewed status
+    - [ ] Combine multiple filters
+    - [ ] Return filtered MediaFile array
+- [ ] Implement Sort logic (`src/lib/sorting.ts`)
+    - [ ] Sort by view count (asc/desc)
+    - [ ] Sort by last viewed (asc/desc)
+    - [ ] Sort by created date (asc/desc)
+    - [ ] Sort by like count (desc)
+    - [ ] Sort by filename (alpha)
+- [ ] Implement Filter Menu UI
+    - [ ] Dropdown or panel for sort selection
+    - [ ] Visual indication of active filters
+    - [ ] Clear all filters button
+    - [ ] Save filter preferences to localStorage
+- [ ] Build View History display (`src/components/ViewHistory.ts`)
+    - [ ] Last 20 items with thumbnails
+    - [ ] Timestamp display (relative: "2 hours ago")
+    - [ ] Click to jump to that media
+    - [ ] Scrollable list
+- [ ] Add Manual Refresh button
+    - [ ] Button in top bar or sidebar
+    - [ ] Trigger folder re-scan (mock in Phase 3)
+    - [ ] Show scan progress/status message
+    - [ ] Reload grid after scan complete
 
 ## Phase 4: Backend Integration (Bun.js)
-- [ ] Initialize Bun project and SQLite database.
-- [ ] Implement Media Discovery (scan folders).
-- [ ] REST API for Media, Tags, and History.
+- [ ] Initialize Bun project structure
+    - [ ] Create `server/` directory
+    - [ ] Initialize Bun project: `bun init`
+    - [ ] Setup TypeScript configuration for server
+    - [ ] Install dependencies: `bun add better-sqlite3 cors`
+    - [ ] Setup project structure (routes, controllers, services)
+- [ ] Setup SQLite database
+    - [ ] Configure better-sqlite3 connection
+    - [ ] Create database initialization script
+    - [ ] Run initial migration with CREATE TABLE statements
+    - [ ] Add seed data for testing
+    - [ ] Setup database backup strategy
+- [ ] Implement database service layer (`server/services/database.ts`)
+    - [ ] Connection management
+    - [ ] Query helpers (select, insert, update, delete)
+    - [ ] Transaction support
+    - [ ] Error handling and logging
+- [ ] Implement Media Discovery service (`server/services/scanner.ts`)
+    - [ ] Recursive folder scanning (readdir)
+    - [ ] Filter for image file extensions (.jpg, .png, .gif, .webp)
+    - [ ] Extract image metadata with sharp library
+    - [ ] Generate file hashes for duplicate detection (crypto)
+    - [ ] Upsert into MediaFiles table
+    - [ ] Handle deleted files (mark is_deleted)
+- [ ] Implement Thumbnail Generation service (`server/services/thumbnails.ts`)
+    - [ ] Use sharp library for image resizing
+    - [ ] Generate 3 sizes: small (200px), medium (400px), large (800px)
+    - [ ] Save to filesystem cache directory
+    - [ ] Cache invalidation on file modification
+    - [ ] Serve cached thumbnails or generate on-demand
+- [ ] Setup REST API server (`server/index.ts`)
+    - [ ] Bun HTTP server setup
+    - [ ] CORS middleware configuration
+    - [ ] JSON body parser
+    - [ ] Error handling middleware
+    - [ ] Request logging
+    - [ ] Static file serving for thumbnails
+- [ ] Implement Media endpoints (`server/routes/media.ts`)
+    - [ ] GET /api/media - List with filters and sort
+    - [ ] GET /api/media/:id - Single media details
+    - [ ] POST /api/media/:id/view - Increment view count
+    - [ ] POST /api/media/:id/like - Increment like
+    - [ ] POST /api/media/:id/dislike - Set to -1
+    - [ ] GET /api/media/:id/file - Serve actual file
+    - [ ] GET /api/thumbnails/:id - Serve thumbnail
+- [ ] Implement Tag endpoints (`server/routes/tags.ts`)
+    - [ ] GET /api/tags - List all tags with counts
+    - [ ] POST /api/media/:id/tags - Add tags
+    - [ ] DELETE /api/media/:id/tags/:tag - Remove tag
+    - [ ] Update tag usage counts on add/remove
+- [ ] Implement History endpoints (`server/routes/history.ts`)
+    - [ ] GET /api/history - Last 20 items
+    - [ ] Cleanup old history entries (keep last 100)
+- [ ] Implement Folder endpoints (`server/routes/folders.ts`)
+    - [ ] GET /api/folders - List configured folders
+    - [ ] POST /api/scan - Trigger manual scan
+    - [ ] Read from config/folders.json
+    - [ ] Return scan progress/results
+- [ ] Update frontend to use real API
+    - [ ] Replace localStorage mock with fetch calls
+    - [ ] Implement API client service (`src/lib/api.ts`)
+    - [ ] Error handling and retry logic
+    - [ ] Loading states during API calls
+    - [ ] Fallback to mock data if API unavailable
 
-## Phase 5: Randomization & Polish
-- [ ] Implement Randomization Algorithms (Least viewed, Weighted, etc.).
-- [ ] Playlist management and serialization.
-- [ ] VR Controller support (WebXR).
-- [ ] Final visual polish and transitions.
+## Phase 5: Randomization & Playlists
+- [ ] Implement Randomization service (`server/services/randomizer.ts`)
+    - [ ] Random algorithm (shuffle with Fisher-Yates)
+    - [ ] Prioritize unviewed (view_count = 0 first)
+    - [ ] Prioritize least-viewed (sort by view_count asc, then shuffle)
+    - [ ] Prioritize most-liked (sort by like_count desc, then shuffle)
+    - [ ] Prioritize most-viewed (sort by view_count desc, then shuffle)
+    - [ ] Always exclude disliked (like_count < 0)
+    - [ ] Apply current filters to randomization pool
+- [ ] Implement randomization session management
+    - [ ] Create session with UUID
+    - [ ] Store media_order as JSON array in RandomizationSessions
+    - [ ] Track current_index in session
+    - [ ] API to resume session by ID
+    - [ ] Handle deleted/moved files (skip and continue)
+    - [ ] Session expiration and cleanup (delete after 7 days)
+- [ ] Implement Randomization endpoints (`server/routes/randomize.ts`)
+    - [ ] POST /api/randomize - Create new session
+    - [ ] GET /api/randomize/:sessionId - Resume session
+    - [ ] PUT /api/randomize/:sessionId - Update current index
+    - [ ] DELETE /api/randomize/:sessionId - Clear session
+- [ ] Implement Playlist endpoints (`server/routes/playlists.ts`)
+    - [ ] GET /api/playlists - List all playlists
+    - [ ] GET /api/playlists/:id - Get playlist with media
+    - [ ] POST /api/playlists - Create playlist
+    - [ ] PUT /api/playlists/:id - Update playlist name/description
+    - [ ] DELETE /api/playlists/:id - Delete playlist
+    - [ ] POST /api/playlists/:id/media - Add media to playlist
+    - [ ] DELETE /api/playlists/:id/media/:mediaId - Remove media
+    - [ ] PUT /api/playlists/:id/reorder - Update media order
+- [ ] Build Playlist UI (`src/components/PlaylistManager.ts`)
+    - [ ] List of playlists in sidebar
+    - [ ] Create new playlist dialog
+    - [ ] Rename/delete playlist actions
+    - [ ] Drag-and-drop to reorder media in playlist
+    - [ ] Add current media to playlist button
+    - [ ] Switch between folder and playlist view modes
+- [ ] Implement "Resume where left off" functionality
+    - [ ] Store current session state in localStorage
+    - [ ] Include: folder/playlist, media ID, filter state, randomization session
+    - [ ] Restore on app load
+    - [ ] Handle edge cases (file deleted, folder missing)
+    - [ ] Fallback to first media if resume fails
+- [ ] Build Randomization UI
+    - [ ] Algorithm selector dropdown
+    - [ ] "Randomize" button in top bar
+    - [ ] Visual indicator when in random mode
+    - [ ] Option to save randomization as playlist
+    - [ ] Exit random mode button
+
+## Phase 6: Video Support
+- [ ] Add video format detection to backend
+    - [ ] Update scanner to recognize .mp4, .webm, .mov
+    - [ ] Store mime_type in MediaFiles table
+    - [ ] Extract video metadata with ffmpeg
+    - [ ] Extract video dimensions and duration
+- [ ] Implement video thumbnail generation
+    - [ ] Install ffmpeg on server
+    - [ ] Extract frame at 10% duration
+    - [ ] Generate same 3 thumbnail sizes as images
+    - [ ] Cache video thumbnails same as images
+    - [ ] Fallback placeholder if generation fails
+- [ ] Build Video Player component (`src/components/VideoPlayer.ts`)
+    - [ ] HTML5 video element
+    - [ ] Fit-to-window aspect ratio (same as images)
+    - [ ] Decide on native controls vs custom (start with native)
+    - [ ] Custom play/pause overlay
+    - [ ] Volume control
+    - [ ] Seek bar
+    - [ ] Playback speed control (0.5x, 1x, 1.5x, 2x)
+    - [ ] Fullscreen API integration
+- [ ] Implement video-specific features
+    - [ ] Autoplay preference in settings
+    - [ ] Loop option toggle
+    - [ ] Duration display in grid thumbnails
+    - [ ] Video icon indicator in grid/carousel
+    - [ ] Keyboard shortcuts (Space=play/pause, Arrows=seek)
+- [ ] Update UI for video filtering
+    - [ ] Video type filter in sidebar (Images/Videos/Both)
+    - [ ] Remember preference per folder
+    - [ ] Update grid to show video duration
+    - [ ] Video playback status indicator
+- [ ] Handle video-specific edge cases
+    - [ ] Codec not supported errors
+    - [ ] Large file streaming vs download
+    - [ ] Mobile device autoplay restrictions
+    - [ ] Battery-saving pause when tab inactive
+
+## Phase 7: Polish & Advanced Features
+- [ ] Implement bulk operations for disliked media
+    - [ ] Multi-select mode toggle in grid view
+    - [ ] Checkbox overlays on thumbnails
+    - [ ] Select all/none/inverse buttons
+    - [ ] Bulk action toolbar when items selected
+    - [ ] Move to trash confirmation dialog
+    - [ ] API endpoint to move files to temp directory
+    - [ ] Restore from trash UI (optional)
+    - [ ] Permanent delete after review period
+- [ ] Build Settings panel (`src/components/Settings.ts`)
+    - [ ] Modal dialog or dedicated page
+    - [ ] Thumbnail cache size setting
+    - [ ] Max view history items setting
+    - [ ] Default sort/filter preferences
+    - [ ] Keyboard shortcut customization
+    - [ ] UI auto-hide timeout slider
+    - [ ] Grid density preference
+    - [ ] Theme toggle (if light mode added)
+    - [ ] Save/cancel buttons
+- [ ] Implement smooth transitions and animations
+    - [ ] View change transitions (grid ↔ single)
+    - [ ] Fade in/out for image loading
+    - [ ] Slide animations for nav bars
+    - [ ] Zoom animation for single view
+    - [ ] Carousel smooth scroll
+    - [ ] Honor prefers-reduced-motion
+- [ ] Loading state improvements
+    - [ ] Skeleton screens for grid loading
+    - [ ] Progress bar for large operations (scan, bulk delete)
+    - [ ] Shimmer effect on loading thumbnails
+    - [ ] Spinner for API requests
+    - [ ] Optimistic UI updates
+- [ ] Error message improvements
+    - [ ] Toast notification system
+    - [ ] Different styles for info/success/warning/error
+    - [ ] Auto-dismiss with configurable timeout
+    - [ ] Action buttons in toasts (Retry, Undo)
+    - [ ] Error boundary for React-like error catching
+- [ ] Responsive design refinement
+    - [ ] Mobile-specific layouts
+    - [ ] Touch-optimized button sizes
+    - [ ] Tablet-specific grid columns
+    - [ ] Portrait vs landscape optimizations
+    - [ ] Safe area insets for notched devices
+- [ ] Accessibility audit and fixes
+    - [ ] Screen reader testing with NVDA/JAWS
+    - [ ] Keyboard-only navigation testing
+    - [ ] ARIA labels on all interactive elements
+    - [ ] Focus indicators with proper contrast
+    - [ ] Announce view changes to screen readers
+    - [ ] Alt text from filename or tags
+    - [ ] Semantic HTML structure
+    - [ ] WCAG 2.1 Level AA compliance check
+- [ ] Performance optimization
+    - [ ] Profile with Chrome DevTools
+    - [ ] Optimize database queries with indexes
+    - [ ] Implement virtual scrolling if needed
+    - [ ] Lazy load images with Intersection Observer
+    - [ ] Debounce/throttle expensive operations
+    - [ ] Code splitting and tree shaking
+    - [ ] Minimize bundle size
+    - [ ] Lighthouse audit and optimization
+
+## Phase 8: Testing & Documentation
+- [ ] Setup testing infrastructure
+    - [ ] Install Vitest and testing libraries
+    - [ ] Configure test environment
+    - [ ] Setup test coverage reporting
+    - [ ] Add test scripts to package.json
+- [ ] Write unit tests
+    - [ ] Test randomization algorithms
+    - [ ] Test zoom/aspect ratio calculations
+    - [ ] Test filter/sort logic
+    - [ ] Test localStorage handlers
+    - [ ] Test utility functions
+    - [ ] Aim for >80% coverage
+- [ ] Write integration tests
+    - [ ] API endpoint tests with mock database
+    - [ ] Database CRUD operation tests
+    - [ ] File system operations tests
+    - [ ] Thumbnail generation tests
+- [ ] Write E2E tests
+    - [ ] Install Playwright or Cypress
+    - [ ] Test complete user workflows
+    - [ ] View grid → select media → like/tag → filter
+    - [ ] Create playlist workflow
+    - [ ] Randomization workflow
+    - [ ] UI interaction tests
+- [ ] Performance testing
+    - [ ] Load test with 1000+ files
+    - [ ] Database query performance benchmarks
+    - [ ] Memory leak detection
+    - [ ] Thumbnail generation performance
+    - [ ] API response time monitoring
+- [ ] Write user documentation
+    - [ ] README with project overview
+    - [ ] Installation instructions
+    - [ ] Configuration guide (folders.json)
+    - [ ] User guide with screenshots
+    - [ ] Keyboard shortcuts reference
+    - [ ] Troubleshooting section
+- [ ] Write developer documentation
+    - [ ] Architecture overview
+    - [ ] API documentation (OpenAPI/Swagger)
+    - [ ] Database schema documentation
+    - [ ] Contributing guidelines
+    - [ ] Code style guide
+    - [ ] Setup development environment guide
+- [ ] Create deployment guide
+    - [ ] Production build instructions
+    - [ ] Server deployment options
+    - [ ] Environment variables
+    - [ ] Database backup procedures
+    - [ ] Update procedures
