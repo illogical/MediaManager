@@ -1,7 +1,5 @@
 # Coding Standards
 
-These standards are optimized for working with LLMs and for small/medium PoCs that may grow into production apps.
-
 ## 1. Project Layout
 
 - Top-level:
