@@ -1,10 +1,20 @@
-import "./main.css";
+import './main.css';
+import { ThumbnailGrid } from './components/ThumbnailGrid';
+import { MediaFile } from './types';
 
-// App entrypoint
-document.addEventListener("DOMContentLoaded", () => {
-  const app = document.querySelector("#app");
-  if (app) {
-    app.innerHTML = "<main><h1>MediaManager</h1></main>";
-  }
-});
+// Mock Data for Phase 1
+const mockMediaFiles: MediaFile[] = Array.from({ length: 50 }, (_, i) => ({
+  id: `mock-${i}`,
+  filename: `Image ${i + 1}`,
+  url: '', // Empty URL to trigger placeholder
+  type: 'image'
+}));
 
+const app = document.querySelector<HTMLDivElement>('#app');
+
+if (app) {
+  const thumbnailGrid = new ThumbnailGrid(mockMediaFiles);
+  app.appendChild(thumbnailGrid.render());
+} else {
+  console.error('App container not found!');
+}

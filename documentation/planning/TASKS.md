@@ -1,25 +1,25 @@
 # MediaManager Project Tasks
 
 ## Phase 0: Specification & Planning
-- [ ] Document tech stack in SPECIFICATION.md
-    - [ ] Vanilla HTML, CSS, TypeScript via Vite for frontend
-    - [ ] Bun.js backend with SQLite database
-    - [ ] Server-side filesystem access with REST API
-- [ ] Complete database schema in SPECIFICATION.md
-    - [ ] Add all table definitions with fields, types, and constraints
-    - [ ] MediaFiles: Add fields for file_size, width, height, mime_type, created_date, file_hash
-    - [ ] Add indexes: folder_path, last_viewed, like_count, view_count
-    - [ ] Clarify like_count as integer: negative=dislike (-1), zero=undecided (0), positive=like count
-    - [ ] Create Folders table for folder metadata
-    - [ ] Create Tags table for tag definitions
-    - [ ] Create MediaTags junction table for many-to-many relationship
-    - [ ] Create RandomizationSessions table for serializing random order
-    - [ ] Create Config table for app-wide settings
-    - [ ] Add compound indexes and foreign key constraints
-- [ ] Document complete API contract in SPECIFICATION.md
-    - [ ] Define all REST endpoints with HTTP methods
-    - [ ] Specify request/response formats (JSON schemas)
-    - [ ] Document error response structure and status codes
+- [x] Document tech stack in SPECIFICATION.md
+    - [x] Vanilla HTML, CSS, TypeScript via Vite for frontend
+    - [x] Bun.js backend with SQLite database
+    - [x] Server-side filesystem access with REST API
+- [x] Complete database schema in DATABASE.md
+    - [x] Add all table definitions with fields, types, and constraints
+    - [x] MediaFiles: Add fields for file_size, width, height, mime_type, created_date, file_hash
+    - [x] Add indexes: folder_path, last_viewed, like_count, view_count
+    - [x] Clarify like_count as integer: negative=dislike (-1), zero=undecided (0), positive=like count
+    - [x] Create Folders table for folder metadata
+    - [x] Create Tags table for tag definitions
+    - [x] Create MediaTags junction table for many-to-many relationship
+    - [x] Create RandomizationSessions table for serializing random order
+    - [x] Create Config table for app-wide settings
+    - [x] Add compound indexes and foreign key constraints
+- [x] Document complete API contract in SPECIFICATION.md
+    - [x] Define all REST endpoints with HTTP methods
+    - [x] Specify request/response formats (JSON schemas)
+    - [x] Document error response structure and status codes
     - [ ] Add authentication/CORS policy if needed
     - [ ] Endpoint: GET /api/folders - List configured folders
     - [ ] Endpoint: GET /api/media?folder=&type=&tags=&sort= - Get filtered media

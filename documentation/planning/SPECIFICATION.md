@@ -22,32 +22,32 @@ Videos should be zoomed to fit full-page without affecting the original aspect r
 ## Development Approach
 - Phase 1-3: Frontend-only with mock data and localStorage
 - Phase 4+: Full-stack integration with Bun.js backend
-- Images first, video support in later phases
+- Images first, video and music support in later phases
 # Features
 
-- [ ]  Configuration JSON schema for selected folder locations that contain images and/or videos to display as options on the website’s navigation bar
-- [ ]  Track a view history that tracks the last time the photo or video was viewed and how many times it was viewed
-- [ ]  Ability to tag images and videos
-    - [ ]  Auto-complete for adding existing tags
-- [ ]  Ability to like or dislike media files
-    - [ ]  Like button increments a counter (1, 2, 3, etc.) each time clicked
-    - [ ]  Dislike button sets the counter to -1 regardless of current value
-    - [ ]  Counter value of 0 means undecided/neutral
-    - [ ]  Visual feedback shows current like count on the button
-- [ ]  Ability to filter by folder and by tag
-- [ ]  Ability to filter by images or videos and remember the choice for each selected folder
-- [ ]  Ability to filter by likes or dislikes
-- [ ]  Ability to view a view history list
-    - [ ]  Displays the last 20 viewed items
-- [ ]  Custom algorithm for randomly choosing an image or video to play
-    - [ ]  Ability to store the randomization as a named playlist
-    - [ ]  Support for selecting from a list a playlists
-- [ ]  Ability to take action only disliked images and videos in bulk
-    - [ ]  A filter to view and select disliked content along with a delete button that will accept an array of file paths and will move them to a temporary directory to be reviewed later
-- [ ]  Ability to start where the user had left off
-    - [ ]  Remember the last viewed folder and image or video
-        - [ ]  Need to serialize details such as folder path, media type, sort order, and/or additional filters to be able to apply them again next the page is visited
-        - [ ]  Needs to serialize the current randomization order (store in a lookup table of order to media ID)
+- Configuration JSON schema for selected folder locations that contain images and/or videos to display as options on the website’s navigation bar
+- Track a view history that tracks the last time the photo or video was viewed and how many times it was viewed
+- Ability to tag images and videos
+    - Auto-complete for adding existing tags
+- Ability to like or dislike media files
+    - Like button increments a counter (1, 2, 3, etc.) each time clicked
+    - Dislike button sets the counter to -1 regardless of current value
+    - Counter value of 0 means undecided/neutral
+    - Visual feedback shows current like count on the button
+- Ability to filter by folder and by tag
+- Ability to filter by images or videos and remember the choice for each selected folder
+- Ability to filter by likes or dislikes
+- Ability to view a view history list
+    - Displays the last 20 viewed items
+- Custom algorithm for randomly choosing an image or video to play
+    - Ability to store the randomization as a named playlist
+    - Support for selecting from a list a playlists
+- Ability to take action only disliked images and videos in bulk
+    - A filter to view and select disliked content along with a delete button that will accept an array of file paths and will move them to a temporary directory to be reviewed later
+- Ability to start where the user had left off
+    - Remember the last viewed folder and image or video
+        - Need to serialize details such as folder path, media type, sort order, and/or additional filters to be able to apply them again next the page is visited
+        - Needs to serialize the current randomization order (store in a lookup table of order to media ID)
 
 ## Inputs Supported
 
@@ -115,18 +115,18 @@ This randomization needs to support being serialized so that it can be remembere
 
 # Layout
 
-- [ ]  Ability to hide the navigation to focus on content. The interface will be like an overlay where the footer slides in from the top and a left nav that slides in from the left when the user clicks on the content and slides out if the content is clicked again.
-    - [ ]  Click or tap to display the navigation and menus
-- [ ]  Navigation for selecting a folder path by name, selecting tags for filtering, and selecting filters such as media type. Also a way to select a playlist name instead of a folder.
-    - [ ]  A left navigation bar for selecting which folder’s images and/or videos should be displayed and the sort order, and image and or/video filter
-- [ ]  A top menu bar that contains the buttons for liking, disliking, tagging, randomizing, display the previous or next image or video.
-- [ ]  **Carousel Component**
-    - [ ]  Full-width horizontal strip, typically at the bottom or as a dedicated view mode.
-    - [ ]  Supports click-and-drag (mouse) or swipe (touch) to scroll.
-    - [ ]  Scroll wheel support for horizontal movement.
-    - [ ]  VR controller drag-to-scroll support.
-- [ ]  Ability to view a grid of image and/or video preview thumbnails for the selected folder and the ability to click on an image or video to select it and display it full-screen
-- [ ]  Ability to go back from viewing a photo or video to viewing the grid of previews for the selected folder
+- Ability to hide the navigation to focus on content. The interface will be like an overlay where the footer slides in from the top and a left nav that slides in from the left when the user clicks on the content and slides out if the content is clicked again.
+    - Click or tap to display the navigation and menus
+- Navigation for selecting a folder path by name, selecting tags for filtering, and selecting filters such as media type. Also a way to select a playlist name instead of a folder.
+    - A left navigation bar for selecting which folder’s images and/or videos should be displayed and the sort order, and image and or/video filter
+- A top menu bar that contains the buttons for liking, disliking, tagging, randomizing, display the previous or next image or video.
+- **Carousel Component**
+    - Full-width horizontal strip, typically at the bottom or as a dedicated view mode.
+    - Supports click-and-drag (mouse) or swipe (touch) to scroll.
+    - Scroll wheel support for horizontal movement.
+    - VR controller drag-to-scroll support.
+- Ability to view a grid of image and/or video preview thumbnails for the selected folder and the ability to click on an image or video to select it and display it full-screen
+- Ability to go back from viewing a photo or video to viewing the grid of previews for the selected folder
 
 # Dependencies
 
@@ -618,29 +618,29 @@ interface LocalStorageSchema {
 - **Optional**: MOV (if browser supports)
 
 ## Player Features (To Be Specified)
-- [ ] Fit-to-viewport aspect ratio (same logic as images)
-- [ ] Play/Pause controls
-- [ ] Seek bar with preview thumbnails (optional)
-- [ ] Volume control
-- [ ] Playback speed control
-- [ ] Fullscreen support
-- [ ] Autoplay preference (off by default)
-- [ ] Loop option
-- [ ] Keyboard shortcuts (Space=play/pause, Arrow keys=seek)
+- Fit-to-viewport aspect ratio (same logic as images)
+- Play/Pause controls
+- Seek bar with preview thumbnails (optional)
+- Volume control
+- Playback speed control
+- Fullscreen support
+- Autoplay preference (off by default)
+- Loop option
+- Keyboard shortcuts (Space=play/pause, Arrow keys=seek)
 
 ## Thumbnail Generation Strategy (To Be Planned)
-- [ ] Decide: Server-side (ffmpeg) vs client-side (video-seek)
-- [ ] Thumbnail extraction timing (e.g., frame at 10% duration)
-- [ ] Thumbnail cache location (filesystem vs database blob)
-- [ ] Cache size limits and eviction policy
-- [ ] Lazy generation vs pre-generation during scan
+- Decide: Server-side (ffmpeg) vs client-side (video-seek)
+- Thumbnail extraction timing (e.g., frame at 10% duration)
+- Thumbnail cache location (filesystem vs database blob)
+- Cache size limits and eviction policy
+- Lazy generation vs pre-generation during scan
 
 ## Technical Considerations
-- [ ] Video codec detection and format validation
-- [ ] Streaming vs progressive download
-- [ ] Buffer management for large files
-- [ ] Mobile device playback compatibility
-- [ ] Hardware acceleration support
+- Video codec detection and format validation
+- Streaming vs progressive download
+- Buffer management for large files
+- Mobile device playback compatibility
+- Hardware acceleration support
 
 # Future Considerations
 

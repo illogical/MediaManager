@@ -1,110 +1,68 @@
-/* CSS Custom Properties - Theme */
 :root {
-  /* Colors - Medium-dark theme */
-  --color-bg-primary: #1a1a1a;
-  --color-bg-secondary: #2a2a2a;
-  --color-bg-tertiary: #3a3a3a;
-  --color-text-primary: #e0e0e0;
-  --color-text-secondary: #b0b0b0;
-  --color-border: #4a4a4a;
-  --color-accent: #5a9;
-  --color-accent-hover: #6bb;
+  /* Color Palette - Medium Dark & Teals */
+  --color-bg-primary: #011F26;
+  --color-overlay: #033A40;
+  --color-accent-1: #0D5B8C;
+  --color-accent-2: #03738C;
+  --color-accent-3: #1F6A73;
+  --color-text-main: #ffffff;
+  --color-text-muted: #a0c4c4;
+  --color-border: rgba(31, 106, 115, 0.3);
 
-  /* Spacing scale */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
 
-  /* Border radius scale */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-
-  /* Shadow styles */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
-
-  /* Transition defaults */
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-  --transition-slow: 350ms ease;
-
-  /* Fonts - exposed via custom properties */
-  --font-sans: system-ui, -apple-system, sans-serif;
-  --font-mono: "Courier New", monospace;
+  /* Animations */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
 }
 
-/* Reset & Base Styles */
-* {
+/* Reset */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  line-height: 1.6;
-  min-height: 100vh;
+  color: var(--color-text-main);
+  line-height: 1.5;
+  height: 100vh;
+  overflow: hidden;
+  /* App-like feel */
 }
 
 #app {
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Ensures children can grow/shrink correctly */
 }
 
-/* Semantic HTML elements */
-main {
-  padding: var(--spacing-xl);
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin-bottom: var(--spacing-md);
-  color: var(--color-text-primary);
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
 }
 
-/* Utility classes for depth and transitions */
-.card {
-  background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  padding: var(--spacing-lg);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent-3);
+  border-radius: 4px;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-2);
 }
-
-button {
-  background-color: var(--color-accent);
-  color: var(--color-text-primary);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  cursor: pointer;
-  transition: background-color var(--transition-base), transform var(--transition-fast);
-}
-
-button:hover {
-  background-color: var(--color-accent-hover);
-  transform: scale(1.05);
-}
-
-button:active {
-  transform: scale(0.98);
-}
-

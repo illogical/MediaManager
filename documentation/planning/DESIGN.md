@@ -38,10 +38,13 @@ This document elaborates on the visual and interactive design of the Multimedia 
 - **Hover**: Subtle scale-up or border highlight.
 
 ## Color Palette & Styles
-- **Primary Background**: HSL(220, 15%, 10%)
-- **Overlay Background**: HSLA(220, 15%, 15%, 0.8) with `backdrop-filter: blur(10px)`
-- **Accent Color**: HSL(210, 100%, 60%) (Electric Blue)
-- **Border**: Thin 1px borders with low opacity for depth.
+- **Primary Background**: #011F26 (RGB 1, 31, 38)
+- **Overlay Consideration**: #033A40 (RGB 3, 58, 64)
+- **Accents/Teals**: 
+    - #0D5B8C (RGB 13, 91, 140)
+    - #03738C (RGB 3, 115, 140)
+    - #1F6A73 (RGB 31, 106, 115)
+- **Border**: Thin 1px borders using muted teal (#1F6A73) with low opacity.
 
 ## Simulation & Persistence (Temporary)
 - Until the Bun.js backend is implemented, `localStorage` will be used to store:
