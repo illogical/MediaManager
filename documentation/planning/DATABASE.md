@@ -7,7 +7,7 @@ This document defines the complete SQLite database schema for the MediaManager a
 The database uses SQLite and consists of 8 tables:
 - **MediaFiles**: Core table storing all media file metadata
 - **Folders**: Configuration for folder paths and preferences
-- **Tags**: Tag definitions and usage tracking
+- **Tags**: Tag definitions and usage tracking.
 - **MediaTags**: Junction table for many-to-many media-tag relationships
 - **ViewHistory**: Tracks viewing history for each media file
 - **Playlists**: Named collections of media
@@ -25,14 +25,11 @@ Stores metadata for all media files (images and videos).
 CREATE TABLE MediaFiles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     folder_path TEXT NOT NULL,
-    filename TEXT NOT NULL,
+    file_name TEXT NOT NULL,
     file_path TEXT NOT NULL UNIQUE,
-    file_size INTEGER NOT NULL,
-    mime_type TEXT NOT NULL,
     width INTEGER,
     height INTEGER,
     created_date DATETIME,
-    file_hash TEXT,
     view_count INTEGER DEFAULT 0,
     last_viewed DATETIME,
     like_count INTEGER DEFAULT 0,  -- negative=dislike (-1), 0=undecided, positive=like count
@@ -46,7 +43,6 @@ CREATE INDEX idx_media_last_viewed ON MediaFiles(last_viewed);
 CREATE INDEX idx_media_like_count ON MediaFiles(like_count);
 CREATE INDEX idx_media_view_count ON MediaFiles(view_count);
 CREATE INDEX idx_media_created_date ON MediaFiles(created_date);
-CREATE INDEX idx_media_mime_type ON MediaFiles(mime_type);
 ```
 
 **Field Descriptions:**
@@ -55,7 +51,6 @@ CREATE INDEX idx_media_mime_type ON MediaFiles(mime_type);
 - `filename`: Name of the file (e.g., "IMG_001.jpg")
 - `file_path`: Full absolute path to the file (unique)
 - `file_size`: File size in bytes
-- `mime_type`: MIME type (e.g., "image/jpeg", "video/mp4")
 - `width`: Image/video width in pixels
 - `height`: Image/video height in pixels
 - `created_date`: Original file creation date from filesystem
@@ -69,7 +64,7 @@ CREATE INDEX idx_media_mime_type ON MediaFiles(mime_type);
 
 ### Folders Table
 
-Stores configuration for monitored folders.
+Stores configuration for indexed folders.
 
 ```sql
 CREATE TABLE Folders (
@@ -102,8 +97,6 @@ Stores tag definitions and usage statistics.
 CREATE TABLE Tags (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
-    color TEXT,
-    usage_count INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -113,7 +106,6 @@ CREATE INDEX idx_tags_name ON Tags(name);
 **Field Descriptions:**
 - `id`: Auto-incrementing primary key
 - `name`: Tag name (unique, case-sensitive)
-- `color`: Optional hex color for tag display (e.g., "#3b82f6")
 - `usage_count`: Number of media files with this tag (cached count)
 - `created_at`: When this tag was first created
 
@@ -298,9 +290,7 @@ While most configuration is stored in the database, folder paths are configured 
       "path": "/absolute/path/to/family/videos",
       "enabled": true
     }
-  ],
-  "thumbnailCacheSize": 1000,
-  "scanOnStartup": false
+  ]
 }
 ```
 
@@ -349,38 +339,10 @@ All critical query paths are indexed:
 3. **Unique constraints** prevent duplicate entries
 4. **Soft deletes** (`is_deleted` flag) preserve history while hiding deleted files
 
-## Backup and Restore
-
-### Backup Strategy
-
-```bash
-# Simple backup
-sqlite3 mediamanager.db ".backup mediamanager_backup.db"
-
-# With timestamp
-sqlite3 mediamanager.db ".backup backup/mediamanager_$(date +%Y%m%d_%H%M%S).db"
-```
-
-### Restore Strategy
-
-```bash
-# Restore from backup
-cp mediamanager_backup.db mediamanager.db
-
-# Verify integrity
-sqlite3 mediamanager.db "PRAGMA integrity_check;"
-```
-
-### Automated Backups
-
-Consider scheduling daily backups and keeping last 7 days:
-
-```bash
-# In cron or task scheduler
-0 2 * * * /path/to/backup_script.sh
-```
 
 ## Testing
+
+Use Vitest and test each component and backend functionality.
 
 ### Sample Data
 
