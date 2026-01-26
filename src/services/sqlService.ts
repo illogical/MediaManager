@@ -17,6 +17,7 @@ export class SqlService {
    * Connect to the database
    */
   connect(): void {
+    logService.trace("SqlService.connect() called");
     if (this.db) {
       logService.warn("Database already connected");
       return;
@@ -37,6 +38,7 @@ export class SqlService {
    * Close database connection
    */
   close(): void {
+    logService.trace("SqlService.close() called");
     if (this.db) {
       this.db.close();
       this.db = null;
@@ -60,6 +62,7 @@ export class SqlService {
    * Execute a SQL statement (DDL or non-SELECT DML)
    */
   execute(sql: string, params: unknown[] = []): Database.RunResult {
+    logService.trace(`SqlService.execute() called with SQL: ${sql.substring(0, 100)}...`);
     try {
       const stmt = this.getDb().prepare(sql);
       const result = stmt.run(...params);
@@ -93,6 +96,7 @@ export class SqlService {
    * Query single row
    */
   queryOne<T>(sql: string, params: unknown[] = []): T | undefined {
+    logService.trace(`SqlService.queryOne() called with SQL: ${sql.substring(0, 100)}...`);
     try {
       const stmt = this.getDb().prepare(sql);
       return stmt.get(...params) as T | undefined;
@@ -106,6 +110,7 @@ export class SqlService {
    * Query multiple rows
    */
   queryAll<T>(sql: string, params: unknown[] = []): T[] {
+    logService.trace(`SqlService.queryAll() called with SQL: ${sql.substring(0, 100)}...`);
     try {
       const stmt = this.getDb().prepare(sql);
       return stmt.all(...params) as T[];
