@@ -135,6 +135,19 @@ MediaManager/
 ├── src/
 │   ├── main.ts                   # App entry point
 │   ├── main.css                  # Global styles & theme
+│   ├── api/                      # API server (Hono)
+│   │   ├── server.ts            # Server entry point
+│   │   ├── schemas.ts           # Zod validation schemas
+│   │   └── routes/
+│   │       ├── media.ts
+│   │       ├── tags.ts
+│   │       ├── folders.ts
+│   │       ├── history.ts
+│   │       └── playlists.ts
+│   ├── services/                 # Backend services
+│   │   ├── sqlService.ts        # Database operations
+│   │   ├── logService.ts        # Logging
+│   │   └── seedDatabaseService.ts
 │   ├── components/               # UI components
 │   │   ├── UIOverlay.ts
 │   │   ├── ThumbnailGrid.ts
@@ -147,25 +160,16 @@ MediaManager/
 │   ├── lib/                      # Utilities & services
 │   │   ├── mockData.ts          # Development mock data
 │   │   ├── storage.ts           # localStorage helpers
-│   │   ├── api.ts               # API client (Phase 4+)
+│   │   ├── api.ts               # API client
 │   │   ├── filtering.ts         # Filter logic
 │   │   ├── sorting.ts           # Sort logic
 │   │   └── ...
 │   └── types/                    # TypeScript interfaces
 │       └── index.ts
-├── server/                       # Backend (Phase 4+)
-│   ├── index.ts                 # Bun.js server
-│   ├── services/
-│   │   ├── database.ts
-│   │   ├── scanner.ts           # Media discovery
-│   │   ├── thumbnails.ts        # Thumbnail generation
-│   │   └── randomizer.ts
-│   └── routes/
-│       ├── media.ts
-│       ├── tags.ts
-│       ├── folders.ts
-│       ├── playlists.ts
-│       └── ...
+├── scripts/                      # Utility scripts
+│   ├── createDatabase.ts        # Database schema setup
+│   ├── seedDatabase.ts          # Seed sample data
+│   └── seedData.json            # Sample data
 ├── index.html
 ├── tsconfig.json
 ├── vite.config.ts
@@ -242,7 +246,23 @@ The application uses SQLite with 9 tables:
 
 See [DATABASE.md](documentation/planning/DATABASE.md) for complete schema definitions.
 
-## API Endpoints (Phase 4+)
+## API Endpoints
+
+The MediaManager API is a REST API built with Hono that runs on port 17102. All endpoints return a standard response format with `status` and `data` fields.
+
+See [API.md](documentation/API.md) for complete API documentation.
+
+### Quick Start
+
+```bash
+# Setup database
+npm run db:setup
+
+# Start API server
+npm run server
+```
+
+Server runs on: `http://localhost:17102`
 
 ### Media Operations
 - `GET /api/media` - List with filters and sorting
