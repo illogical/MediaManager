@@ -33,3 +33,8 @@ dist-ssr
 coverage
 .nyc_output
 
+# Database files
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
