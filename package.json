@@ -8,20 +8,26 @@
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "test": "vitest"
+    "test": "vitest",
+    "db:create": "tsx scripts/createDatabase.ts",
+    "db:seed": "tsx scripts/seedDatabase.ts",
+    "db:setup": "npm run db:create && npm run db:seed"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "better-sqlite3": "^12.6.2"
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "jsdom": "^23.0.0",
     "prettier": "^3.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0",
-    "vitest": "^1.0.0",
-    "jsdom": "^23.0.0"
+    "vitest": "^1.0.0"
   }
 }
-

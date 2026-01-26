@@ -27,6 +27,8 @@ CREATE TABLE MediaFiles (
     folder_path TEXT NOT NULL,
     file_name TEXT NOT NULL,
     file_path TEXT NOT NULL UNIQUE,
+    file_size INTEGER,
+    mime_type TEXT,
     width INTEGER,
     height INTEGER,
     created_date DATETIME,
@@ -48,13 +50,13 @@ CREATE INDEX idx_media_created_date ON MediaFiles(created_date);
 **Field Descriptions:**
 - `id`: Auto-incrementing primary key
 - `folder_path`: Path to the folder containing this media file
-- `filename`: Name of the file (e.g., "IMG_001.jpg")
+- `file_name`: Name of the file (e.g., "IMG_001.jpg")
 - `file_path`: Full absolute path to the file (unique)
 - `file_size`: File size in bytes
+- `mime_type`: MIME type of the file (e.g., "image/jpeg", "video/mp4")
 - `width`: Image/video width in pixels
 - `height`: Image/video height in pixels
 - `created_date`: Original file creation date from filesystem
-- `file_hash`: Hash for duplicate detection (SHA-256 or similar)
 - `view_count`: Number of times this media has been viewed
 - `last_viewed`: Timestamp of most recent view
 - `like_count`: Like counter (-1=disliked, 0=undecided, positive=like count)
