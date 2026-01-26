@@ -129,9 +129,13 @@ playlists.post("/", zValidator("json", CreatePlaylistSchema), (c) => {
 
     const newPlaylist = sqlService.queryOne<Playlist>("SELECT * FROM Playlists WHERE id = ?", [result.lastInsertRowid]);
 
+    if (!newPlaylist) {
+      throw new Error("Failed to retrieve created playlist");
+    }
+
     const response: ApiResponse<Playlist> = {
       status: 201,
-      data: newPlaylist!,
+      data: newPlaylist,
     };
 
     return c.json(response, 201);
@@ -203,9 +207,13 @@ playlists.put("/:id", zValidator("json", UpdatePlaylistSchema), (c) => {
 
     const updatedPlaylist = sqlService.queryOne<Playlist>("SELECT * FROM Playlists WHERE id = ?", [id]);
 
+    if (!updatedPlaylist) {
+      throw new Error("Failed to retrieve updated playlist");
+    }
+
     const response: ApiResponse<Playlist> = {
       status: 200,
-      data: updatedPlaylist!,
+      data: updatedPlaylist,
     };
 
     return c.json(response);

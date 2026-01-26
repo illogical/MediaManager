@@ -64,9 +64,13 @@ tags.post("/", zValidator("json", CreateTagSchema), (c) => {
 
     const newTag = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE id = ?", [result.lastInsertRowid]);
 
+    if (!newTag) {
+      throw new Error("Failed to retrieve created tag");
+    }
+
     const response: ApiResponse<Tag> = {
       status: 201,
-      data: newTag!,
+      data: newTag,
     };
 
     return c.json(response, 201);
