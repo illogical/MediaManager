@@ -269,7 +269,7 @@ curl -X POST http://localhost:17102/api/tags \
 
 ---
 
-#### POST /api/tags/media/:id
+#### POST /api/media/:id/tags
 
 Add a tag to a media file.
 
@@ -282,7 +282,7 @@ Add a tag to a media file.
 
 **Example:**
 ```bash
-curl -X POST http://localhost:17102/api/tags/media/1 \
+curl -X POST http://localhost:17102/api/media/1/tags \
   -H "Content-Type: application/json" \
   -d '{"tagName": "vacation"}'
 ```
@@ -306,13 +306,13 @@ curl -X POST http://localhost:17102/api/tags/media/1 \
 
 ---
 
-#### GET /api/tags/media/:id
+#### GET /api/media/:id/tags
 
 Get all tags for a media file.
 
 **Example:**
 ```bash
-curl http://localhost:17102/api/tags/media/1
+curl http://localhost:17102/api/media/1/tags
 ```
 
 **Response:**
@@ -331,13 +331,13 @@ curl http://localhost:17102/api/tags/media/1
 
 ---
 
-#### DELETE /api/tags/media/:id/:tagId
+#### DELETE /api/media/:id/tags/:tagId
 
 Remove a tag from a media file.
 
 **Example:**
 ```bash
-curl -X DELETE http://localhost:17102/api/tags/media/1/1
+curl -X DELETE http://localhost:17102/api/media/1/tags/1
 ```
 
 **Response:**
