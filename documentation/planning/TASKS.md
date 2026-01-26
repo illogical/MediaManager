@@ -16,6 +16,10 @@
     - [x] Create RandomizationSessions table for serializing random order
     - [x] Create Config table for app-wide settings
     - [x] Add compound indexes and foreign key constraints
+- [ ] Create and seed the database.
+    - [ ] Create a script that will create the database based the schema in DATABASE.md.
+    - [ ] Create a JSON file that will contain seed data for the database so that each table contains at least one record.
+    - [ ] Create a script that will load the JSON file and parse it into the database tables.
 - [x] Document complete API contract in SPECIFICATION.md
     - [x] Define all REST endpoints with HTTP methods
     - [x] Specify request/response formats (JSON schemas)
