@@ -22,6 +22,7 @@ folders.get("/", (c) => {
 
     const response: ApiResponse<Folder[]> = {
       status: 200,
+      message: `Successfully retrieved ${results.length} folders`,
       data: results,
     };
 
@@ -30,6 +31,7 @@ folders.get("/", (c) => {
     logService.error("Failed to fetch folders", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
+      message: "Failed to fetch folders",
       data: { error: "Failed to fetch folders" },
     };
     return c.json(response, 500);
