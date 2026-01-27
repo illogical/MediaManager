@@ -20,26 +20,8 @@ describe("FileSystemService", () => {
     sqlService = new SqlService(testDbPath);
     sqlService.connect();
 
-    // Create MediaFiles table
-    sqlService.execute(`
-      CREATE TABLE MediaFiles (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        folder_path TEXT NOT NULL,
-        file_name TEXT NOT NULL,
-        file_path TEXT NOT NULL UNIQUE,
-        file_size INTEGER,
-        mime_type TEXT,
-        width INTEGER,
-        height INTEGER,
-        created_date DATETIME,
-        view_count INTEGER DEFAULT 0,
-        last_viewed DATETIME,
-        like_count INTEGER DEFAULT 0,
-        is_deleted BOOLEAN DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // Create MediaFiles table using centralized method
+    sqlService.createMediaFilesTable();
 
     // Create test directory with files
     testDir = path.join("/tmp", `test-files-${Date.now()}`);
