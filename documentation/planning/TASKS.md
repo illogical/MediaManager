@@ -24,20 +24,28 @@
     - [x] Define all REST endpoints with HTTP methods
     - [x] Specify request/response formats (JSON schemas)
     - [x] Document error response structure and status codes
-    - [ ] Add authentication/CORS policy if needed
-    - [ ] Endpoint: GET /api/folders - List configured folders
-    - [ ] Endpoint: GET /api/media?folder=&type=&tags=&sort= - Get filtered media
-    - [ ] Endpoint: GET /api/media/:id - Get single media with metadata
-    - [ ] Endpoint: POST /api/media/:id/view - Increment view count
-    - [ ] Endpoint: POST /api/media/:id/like - Increment like count
-    - [ ] Endpoint: POST /api/media/:id/dislike - Set like_count to -1
-    - [ ] Endpoint: GET /api/tags - List all tags with usage counts
-    - [ ] Endpoint: POST /api/media/:id/tags - Add tag to media
-    - [ ] Endpoint: DELETE /api/media/:id/tags/:tag - Remove tag from media
-    - [ ] Endpoint: GET /api/history - Get last 20 viewed items
+    - [x] Add authentication/CORS policy if needed (CORS enabled for local dev)
+    - [x] Endpoint: GET /api/folders - List configured folders
+    - [x] Endpoint: GET /api/media?folder=&type=&tags=&sort= - Get filtered media
+    - [x] Endpoint: GET /api/media/:id - Get single media with metadata
+    - [x] Endpoint: POST /api/media/:id/view - Increment view count
+    - [x] Endpoint: POST /api/media/:id/like - Increment like count
+    - [x] Endpoint: POST /api/media/:id/dislike - Set like_count to -1
+    - [x] Endpoint: GET /api/tags - List all tags
+    - [x] Endpoint: POST /api/tags - Create new tag
+    - [x] Endpoint: GET /api/media/:id/tags - Get tags for media
+    - [x] Endpoint: POST /api/media/:id/tags - Add tag to media
+    - [x] Endpoint: DELETE /api/media/:id/tags/:tagId - Remove tag from media
+    - [x] Endpoint: GET /api/history - Get last 20 viewed items
+    - [x] Endpoint: GET /api/playlists - List all playlists
+    - [x] Endpoint: GET /api/playlists/:id - Get playlist with media order
+    - [x] Endpoint: POST /api/playlists - Create playlist
+    - [x] Endpoint: PUT /api/playlists/:id - Update playlist
+    - [x] Endpoint: DELETE /api/playlists/:id - Delete playlist
+    - [x] Endpoint: POST /api/playlists/:id/media/:mediaId - Add media to playlist
+    - [x] Endpoint: DELETE /api/playlists/:id/media/:mediaId - Remove media from playlist
+    - [x] Endpoint: PUT /api/playlists/:id/reorder - Reorder playlist media
     - [ ] Endpoint: GET /api/randomize - Get randomized media list with session
-    - [ ] Endpoint: POST /api/playlists - Create/update playlist
-    - [ ] Endpoint: GET /api/playlists/:id - Get playlist with media order
     - [ ] Endpoint: DELETE /api/media/disliked - Bulk move disliked files
     - [ ] Endpoint: POST /api/scan - Trigger manual folder scan
 - [ ] Document localStorage schema in SPECIFICATION.md
@@ -226,23 +234,22 @@
     - [ ] Reload grid after scan complete
 
 ## Phase 4: Backend Integration (Bun.js)
-- [ ] Initialize Bun project structure
-    - [ ] Create `server/` directory
-    - [ ] Initialize Bun project: `bun init`
-    - [ ] Setup TypeScript configuration for server
-    - [ ] Install dependencies: `bun add better-sqlite3 cors`
-    - [ ] Setup project structure (routes, controllers, services)
-- [ ] Setup SQLite database
-    - [ ] Configure better-sqlite3 connection
-    - [ ] Create database initialization script
-    - [ ] Run initial migration with CREATE TABLE statements
-    - [ ] Add seed data for testing
+- [x] Initialize Bun project structure
+    - [x] Setup TypeScript configuration for server
+    - [x] Install dependencies: Hono, Zod, @hono/node-server, @hono/zod-validator
+    - [x] Setup project structure (src/api/routes, src/api/schemas, src/services)
+- [x] Setup SQLite database
+    - [x] Configure better-sqlite3 connection
+    - [x] Create database initialization script (scripts/createDatabase.ts)
+    - [x] Run initial migration with CREATE TABLE statements
+    - [x] Add seed data for testing (scripts/seedData.json, scripts/seedDatabase.ts)
     - [ ] Setup database backup strategy
-- [ ] Implement database service layer (`server/services/database.ts`)
-    - [ ] Connection management
-    - [ ] Query helpers (select, insert, update, delete)
-    - [ ] Transaction support
-    - [ ] Error handling and logging
+- [x] Implement database service layer (`src/services/sqlService.ts`)
+    - [x] Connection management
+    - [x] Query helpers (execute, queryOne, queryAll)
+    - [x] Transaction support (executeMany)
+    - [x] Error handling and logging
+    - [x] Added trace logging to all methods
 - [ ] Implement Media Discovery service (`server/services/scanner.ts`)
     - [ ] Recursive folder scanning (readdir)
     - [ ] Filter for image file extensions (.jpg, .png, .gif, .webp)
@@ -256,34 +263,46 @@
     - [ ] Save to filesystem cache directory
     - [ ] Cache invalidation on file modification
     - [ ] Serve cached thumbnails or generate on-demand
-- [ ] Setup REST API server (`server/index.ts`)
-    - [ ] Bun HTTP server setup
-    - [ ] CORS middleware configuration
-    - [ ] JSON body parser
-    - [ ] Error handling middleware
-    - [ ] Request logging
+- [x] Setup REST API server (`src/api/server.ts`)
+    - [x] Hono HTTP server setup on port 17102
+    - [x] CORS middleware configuration (permissive for local dev)
+    - [x] JSON body parser (built-in with Hono)
+    - [x] Error handling middleware
+    - [x] Request logging middleware with millisecond timestamps
+    - [x] Standard response format: { status: number, data: any }
     - [ ] Static file serving for thumbnails
-- [ ] Implement Media endpoints (`server/routes/media.ts`)
-    - [ ] GET /api/media - List with filters and sort
-    - [ ] GET /api/media/:id - Single media details
-    - [ ] POST /api/media/:id/view - Increment view count
-    - [ ] POST /api/media/:id/like - Increment like
-    - [ ] POST /api/media/:id/dislike - Set to -1
+- [x] Implement Media endpoints (`src/api/routes/media.ts`)
+    - [x] GET /api/media - List with filters and sort (folder, type, tags, sort, limit, offset)
+    - [x] GET /api/media/:id - Single media details
+    - [x] POST /api/media/:id/view - Increment view count
+    - [x] POST /api/media/:id/like - Increment like
+    - [x] POST /api/media/:id/dislike - Set to -1
+    - [x] GET /api/media/:id/tags - Get tags for media
+    - [x] POST /api/media/:id/tags - Add tag to media
+    - [x] DELETE /api/media/:id/tags/:tagId - Remove tag from media
     - [ ] GET /api/media/:id/file - Serve actual file
     - [ ] GET /api/thumbnails/:id - Serve thumbnail
-- [ ] Implement Tag endpoints (`server/routes/tags.ts`)
-    - [ ] GET /api/tags - List all tags with counts
-    - [ ] POST /api/media/:id/tags - Add tags
-    - [ ] DELETE /api/media/:id/tags/:tag - Remove tag
-    - [ ] Update tag usage counts on add/remove
-- [ ] Implement History endpoints (`server/routes/history.ts`)
-    - [ ] GET /api/history - Last 20 items
+- [x] Implement Tag endpoints (`src/api/routes/tags.ts`)
+    - [x] GET /api/tags - List all tags
+    - [x] POST /api/tags - Create new tag
+- [x] Implement History endpoints (`src/api/routes/history.ts`)
+    - [x] GET /api/history - Last 20 items with media details
     - [ ] Cleanup old history entries (keep last 100)
-- [ ] Implement Folder endpoints (`server/routes/folders.ts`)
-    - [ ] GET /api/folders - List configured folders
+- [x] Implement Folder endpoints (`src/api/routes/folders.ts`)
+    - [x] GET /api/folders - List configured folders
     - [ ] POST /api/scan - Trigger manual scan
     - [ ] Read from config/folders.json
     - [ ] Return scan progress/results
+- [x] Implement Playlist endpoints (`src/api/routes/playlists.ts`)
+    - [x] GET /api/playlists - List all playlists
+    - [x] GET /api/playlists/:id - Get playlist with media order
+    - [x] POST /api/playlists - Create playlist
+    - [x] PUT /api/playlists/:id - Update playlist name/description
+    - [x] DELETE /api/playlists/:id - Delete playlist
+    - [x] POST /api/playlists/:id/media/:mediaId - Add media to playlist
+    - [x] DELETE /api/playlists/:id/media/:mediaId - Remove media from playlist
+    - [x] PUT /api/playlists/:id/reorder - Reorder playlist media
+- [x] Add comprehensive API documentation (documentation/API.md)
 - [ ] Update frontend to use real API
     - [ ] Replace localStorage mock with fetch calls
     - [ ] Implement API client service (`src/lib/api.ts`)
@@ -312,15 +331,15 @@
     - [ ] GET /api/randomize/:sessionId - Resume session
     - [ ] PUT /api/randomize/:sessionId - Update current index
     - [ ] DELETE /api/randomize/:sessionId - Clear session
-- [ ] Implement Playlist endpoints (`server/routes/playlists.ts`)
-    - [ ] GET /api/playlists - List all playlists
-    - [ ] GET /api/playlists/:id - Get playlist with media
-    - [ ] POST /api/playlists - Create playlist
-    - [ ] PUT /api/playlists/:id - Update playlist name/description
-    - [ ] DELETE /api/playlists/:id - Delete playlist
-    - [ ] POST /api/playlists/:id/media - Add media to playlist
-    - [ ] DELETE /api/playlists/:id/media/:mediaId - Remove media
-    - [ ] PUT /api/playlists/:id/reorder - Update media order
+- [x] Implement Playlist endpoints (`src/api/routes/playlists.ts`)
+    - [x] GET /api/playlists - List all playlists
+    - [x] GET /api/playlists/:id - Get playlist with media
+    - [x] POST /api/playlists - Create playlist
+    - [x] PUT /api/playlists/:id - Update playlist name/description
+    - [x] DELETE /api/playlists/:id - Delete playlist
+    - [x] POST /api/playlists/:id/media/:mediaId - Add media to playlist
+    - [x] DELETE /api/playlists/:id/media/:mediaId - Remove media
+    - [x] PUT /api/playlists/:id/reorder - Update media order
 - [ ] Build Playlist UI (`src/components/PlaylistManager.ts`)
     - [ ] List of playlists in sidebar
     - [ ] Create new playlist dialog
