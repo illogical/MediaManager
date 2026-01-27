@@ -9,6 +9,7 @@ import { sqlService } from "../src/services/sqlService";
 import { logService } from "../src/services/logService";
 import { FileSystemService } from "../src/services/fileSystemService";
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 
 async function main() {
@@ -16,7 +17,7 @@ async function main() {
     logService.info("=== FileSystemService Demo ===");
 
     // Create a temporary test directory
-    const demoDir = path.join("/tmp", `demo-scan-${Date.now()}`);
+    const demoDir = path.join(os.tmpdir(), `demo-scan-${Date.now()}`);
     fs.mkdirSync(demoDir, { recursive: true });
     logService.info(`Created demo directory: ${demoDir}`);
 

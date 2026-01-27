@@ -3,6 +3,8 @@
  */
 
 import Database from "better-sqlite3";
+import * as fs from "fs";
+import * as path from "path";
 import { logService } from "./logService";
 
 export class SqlService {
@@ -24,6 +26,11 @@ export class SqlService {
     }
 
     try {
+      // Ensure parent directory exists before opening database
+      const dbDir = path.dirname(this.dbPath);
+      if (dbDir && dbDir !== ".") {
+        fs.mkdirSync(dbDir, { recursive: true });
+      }
       this.db = new Database(this.dbPath);
       // Enable foreign keys
       this.db.pragma("foreign_keys = ON");

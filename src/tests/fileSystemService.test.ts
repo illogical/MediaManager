@@ -4,6 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import { FileSystemService } from "../services/fileSystemService";
 import { SqlService } from "../services/sqlService";
@@ -16,7 +17,7 @@ describe("FileSystemService", () => {
 
   beforeEach(() => {
     // Create a test database
-    testDbPath = path.join("/tmp", `test-db-${Date.now()}.db`);
+    testDbPath = path.join(os.tmpdir(), `test-db-${Date.now()}.db`);
     sqlService = new SqlService(testDbPath);
     sqlService.connect();
 
@@ -24,7 +25,7 @@ describe("FileSystemService", () => {
     sqlService.createMediaFilesTable();
 
     // Create test directory with files
-    testDir = path.join("/tmp", `test-files-${Date.now()}`);
+    testDir = path.join(os.tmpdir(), `test-files-${Date.now()}`);
     fs.mkdirSync(testDir, { recursive: true });
 
     fileSystemService = new FileSystemService(sqlService);
