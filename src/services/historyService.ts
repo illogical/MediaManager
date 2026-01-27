@@ -35,14 +35,12 @@ export class HistoryService {
 
       return {
         status: 200,
-        message: `Successfully retrieved ${results.length} history entries`,
         data: results,
       };
     } catch (error) {
       logService.error("Failed to fetch view history", error as Error);
       return {
         status: 500,
-        message: "Failed to fetch view history",
         data: [],
       };
     }

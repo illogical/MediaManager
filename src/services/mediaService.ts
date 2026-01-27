@@ -97,14 +97,12 @@ export class MediaService {
 
       return {
         status: 200,
-        message: `Successfully retrieved ${mediaFilesWithTags.length} media files`,
         data: mediaFilesWithTags,
       };
     } catch (error) {
       logService.error("Failed to fetch media files", error as Error);
       return {
         status: 500,
-        message: "Failed to fetch media files",
         data: [],
       };
     }
@@ -126,7 +124,6 @@ export class MediaService {
         logService.warn(`Media file not found: ${id}`);
         return {
           status: 404,
-          message: "Media file not found",
           data: null,
         };
       }
@@ -143,14 +140,12 @@ export class MediaService {
 
       return {
         status: 200,
-        message: "Successfully retrieved media file",
         data: mediaWithTags,
       };
     } catch (error) {
       logService.error("Failed to fetch media file", error as Error);
       return {
         status: 500,
-        message: "Failed to fetch media file",
         data: null,
       };
     }
@@ -199,7 +194,6 @@ export class MediaService {
         logService.warn(`Media file not found for view count increment: ${id}`);
         return {
           status: 404,
-          message: "Media file not found",
           data: { view_count: 0 },
         };
       }
@@ -224,14 +218,12 @@ export class MediaService {
 
       return {
         status: 200,
-        message: "View count incremented successfully",
         data: { view_count: newViewCount },
       };
     } catch (error) {
       logService.error("Failed to increment view count", error as Error);
       return {
         status: 500,
-        message: "Failed to increment view count",
         data: { view_count: 0 },
       };
     }
@@ -254,7 +246,6 @@ export class MediaService {
         logService.warn(`Media file not found for like count increment: ${id}`);
         return {
           status: 404,
-          message: "Media file not found",
           data: { like_count: 0 },
         };
       }
@@ -275,14 +266,12 @@ export class MediaService {
 
       return {
         status: 200,
-        message: "Like count incremented successfully",
         data: { like_count: newLikeCount },
       };
     } catch (error) {
       logService.error("Failed to increment like count", error as Error);
       return {
         status: 500,
-        message: "Failed to increment like count",
         data: { like_count: 0 },
       };
     }
@@ -305,7 +294,6 @@ export class MediaService {
         logService.warn(`Media file not found for dislike: ${id}`);
         return {
           status: 404,
-          message: "Media file not found",
           data: { like_count: 0 },
         };
       }
@@ -325,14 +313,12 @@ export class MediaService {
 
       return {
         status: 200,
-        message: "Dislike set successfully",
         data: { like_count: -1 },
       };
     } catch (error) {
       logService.error("Failed to set dislike", error as Error);
       return {
         status: 500,
-        message: "Failed to set dislike",
         data: { like_count: 0 },
       };
     }
@@ -355,7 +341,6 @@ export class MediaService {
         logService.warn(`Media file not found for adding tag: ${mediaId}`);
         return {
           status: 404,
-          message: "Media file not found",
           data: { tag: { id: 0, name: "", created_at: "" } },
         };
       }
@@ -386,7 +371,6 @@ export class MediaService {
         logService.warn(`Tag '${tagName}' already applied to media ${mediaId}`);
         return {
           status: 409,
-          message: "Tag already applied to this media",
           data: { tag },
         };
       }
@@ -401,14 +385,12 @@ export class MediaService {
 
       return {
         status: 200,
-        message: "Tag added to media successfully",
         data: { tag },
       };
     } catch (error) {
       logService.error("Failed to add tag to media", error as Error);
       return {
         status: 500,
-        message: "Failed to add tag to media",
         data: { tag: { id: 0, name: "", created_at: "" } },
       };
     }
@@ -431,7 +413,6 @@ export class MediaService {
         logService.warn(`Tag ${tagId} not found on media ${mediaId}`);
         return {
           status: 404,
-          message: "Tag not found on this media",
           data: { success: false },
         };
       }
@@ -446,14 +427,12 @@ export class MediaService {
 
       return {
         status: 200,
-        message: "Tag removed from media successfully",
         data: { success: true },
       };
     } catch (error) {
       logService.error("Failed to remove tag from media", error as Error);
       return {
         status: 500,
-        message: "Failed to remove tag from media",
         data: { success: false },
       };
     }
@@ -472,14 +451,12 @@ export class MediaService {
 
       return {
         status: 200,
-        message: `Successfully retrieved ${tags.length} tags`,
         data: tags,
       };
     } catch (error) {
       logService.error("Failed to fetch tags", error as Error);
       return {
         status: 500,
-        message: "Failed to fetch tags",
         data: [],
       };
     }
@@ -499,7 +476,6 @@ export class MediaService {
         logService.warn(`Tag already exists: ${name}`);
         return {
           status: 409,
-          message: "Tag already exists",
           data: null,
         };
       }
@@ -519,14 +495,12 @@ export class MediaService {
 
       return {
         status: 201,
-        message: "Tag created successfully",
         data: newTag,
       };
     } catch (error) {
       logService.error("Failed to create tag", error as Error);
       return {
         status: 500,
-        message: "Failed to create tag",
         data: null,
       };
     }

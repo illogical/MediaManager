@@ -33,7 +33,6 @@ media.get("/:id", (c) => {
     return c.json(
       {
         status: 400,
-        message: "Invalid media ID",
         data: null,
       },
       400
@@ -55,7 +54,6 @@ media.post("/:id/view", (c) => {
     return c.json(
       {
         status: 400,
-        message: "Invalid media ID",
         data: null,
       },
       400
@@ -77,7 +75,6 @@ media.post("/:id/like", (c) => {
     return c.json(
       {
         status: 400,
-        message: "Invalid media ID",
         data: null,
       },
       400
@@ -99,7 +96,6 @@ media.post("/:id/dislike", (c) => {
     return c.json(
       {
         status: 400,
-        message: "Invalid media ID",
         data: null,
       },
       400
@@ -121,7 +117,6 @@ media.get("/:id/tags", (c) => {
     return c.json(
       {
         status: 400,
-        message: "Invalid media ID",
         data: [],
       },
       400
@@ -132,7 +127,6 @@ media.get("/:id/tags", (c) => {
 
   return c.json({
     status: 200,
-    message: `Successfully retrieved ${tags.length} tags`,
     data: tags,
   });
 });
@@ -148,7 +142,6 @@ media.post("/:id/tags", zValidator("json", AddTagToMediaSchema), (c) => {
     return c.json(
       {
         status: 400,
-        message: "Invalid media ID",
         data: null,
       },
       400
@@ -173,7 +166,6 @@ media.delete("/:id/tags/:tagId", (c) => {
     return c.json(
       {
         status: 400,
-        message: "Invalid media ID or tag ID",
         data: null,
       },
       400

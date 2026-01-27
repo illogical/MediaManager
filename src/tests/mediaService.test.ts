@@ -77,7 +77,6 @@ describe("MediaService", () => {
       });
 
       expect(result.status).toBe(200);
-      expect(result.message).toContain("Successfully retrieved 1 media files");
       expect(result.data).toHaveLength(1);
       expect(result.data[0].tags).toEqual(mockTags);
     });
@@ -107,7 +106,6 @@ describe("MediaService", () => {
       });
 
       expect(result.status).toBe(500);
-      expect(result.message).toBe("Failed to fetch media files");
       expect(result.data).toHaveLength(0);
     });
   });
@@ -142,7 +140,6 @@ describe("MediaService", () => {
       const result = mediaService.getMediaFileById(1);
 
       expect(result.status).toBe(200);
-      expect(result.message).toBe("Successfully retrieved media file");
       expect(result.data?.id).toBe(1);
       expect(result.data?.tags).toEqual(mockTags);
     });
@@ -153,7 +150,6 @@ describe("MediaService", () => {
       const result = mediaService.getMediaFileById(999);
 
       expect(result.status).toBe(404);
-      expect(result.message).toBe("Media file not found");
       expect(result.data).toBeNull();
     });
   });
@@ -184,7 +180,6 @@ describe("MediaService", () => {
       const result = mediaService.incrementViewCount(1);
 
       expect(result.status).toBe(200);
-      expect(result.message).toBe("View count incremented successfully");
       expect(result.data.view_count).toBe(6);
       expect(mockSqlService.execute).toHaveBeenCalledTimes(2); // UPDATE and INSERT
     });
@@ -195,7 +190,6 @@ describe("MediaService", () => {
       const result = mediaService.incrementViewCount(999);
 
       expect(result.status).toBe(404);
-      expect(result.message).toBe("Media file not found");
     });
   });
 
@@ -225,7 +219,6 @@ describe("MediaService", () => {
       const result = mediaService.incrementLikeCount(1);
 
       expect(result.status).toBe(200);
-      expect(result.message).toBe("Like count incremented successfully");
       expect(result.data.like_count).toBe(4);
     });
   });
@@ -256,7 +249,6 @@ describe("MediaService", () => {
       const result = mediaService.setDislike(1);
 
       expect(result.status).toBe(200);
-      expect(result.message).toBe("Dislike set successfully");
       expect(result.data.like_count).toBe(-1);
     });
   });
@@ -283,7 +275,6 @@ describe("MediaService", () => {
       const result = mediaService.addTagToMedia(1, "nature");
 
       expect(result.status).toBe(200);
-      expect(result.message).toBe("Tag added to media successfully");
       expect(result.data.tag.name).toBe("nature");
       expect(mockSqlService.execute).toHaveBeenCalledTimes(2); // INSERT tag, INSERT MediaTags
     });
@@ -326,7 +317,6 @@ describe("MediaService", () => {
       const result = mediaService.addTagToMedia(1, "nature");
 
       expect(result.status).toBe(409);
-      expect(result.message).toBe("Tag already applied to this media");
     });
 
     it("should return 404 when media not found", () => {
@@ -335,7 +325,6 @@ describe("MediaService", () => {
       const result = mediaService.addTagToMedia(999, "nature");
 
       expect(result.status).toBe(404);
-      expect(result.message).toBe("Media file not found");
     });
   });
 
@@ -347,7 +336,6 @@ describe("MediaService", () => {
       const result = mediaService.removeTagFromMedia(1, 1);
 
       expect(result.status).toBe(200);
-      expect(result.message).toBe("Tag removed from media successfully");
       expect(result.data.success).toBe(true);
     });
 
@@ -357,7 +345,6 @@ describe("MediaService", () => {
       const result = mediaService.removeTagFromMedia(1, 1);
 
       expect(result.status).toBe(404);
-      expect(result.message).toBe("Tag not found on this media");
     });
   });
 
@@ -373,7 +360,6 @@ describe("MediaService", () => {
       const result = mediaService.getAllTags();
 
       expect(result.status).toBe(200);
-      expect(result.message).toContain("Successfully retrieved 2 tags");
       expect(result.data).toHaveLength(2);
     });
   });
@@ -398,7 +384,6 @@ describe("MediaService", () => {
       const result = mediaService.createTag("nature");
 
       expect(result.status).toBe(201);
-      expect(result.message).toBe("Tag created successfully");
       expect(result.data?.name).toBe("nature");
     });
 
@@ -414,7 +399,6 @@ describe("MediaService", () => {
       const result = mediaService.createTag("nature");
 
       expect(result.status).toBe(409);
-      expect(result.message).toBe("Tag already exists");
       expect(result.data).toBeNull();
     });
   });

@@ -29,7 +29,6 @@ playlists.get("/", (c) => {
 
     const response: ApiResponse<Playlist[]> = {
       status: 200,
-      message: `Successfully retrieved ${results.length} playlists`,
       data: results,
     };
 
@@ -38,7 +37,6 @@ playlists.get("/", (c) => {
     logService.error("Failed to fetch playlists", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
-      message: "Failed to fetch playlists",
       data: { error: "Failed to fetch playlists" },
     };
     return c.json(response, 500);
@@ -55,7 +53,6 @@ playlists.get("/:id", (c) => {
   if (isNaN(id)) {
     const response: ApiResponse<{ error: string }> = {
       status: 400,
-      message: "Invalid playlist ID",
       data: { error: "Invalid playlist ID" },
     };
     return c.json(response, 400);
@@ -67,7 +64,6 @@ playlists.get("/:id", (c) => {
     if (!playlist) {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
-        message: "Playlist not found",
         data: { error: "Playlist not found" },
       };
       return c.json(response, 404);
@@ -89,7 +85,6 @@ playlists.get("/:id", (c) => {
 
     const response: ApiResponse<{ playlist: Playlist; media: unknown[] }> = {
       status: 200,
-      message: `Successfully retrieved playlist: ${playlist.name} with ${media.length} items`,
       data: { playlist, media },
     };
 
@@ -98,7 +93,6 @@ playlists.get("/:id", (c) => {
     logService.error("Failed to fetch playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
-      message: "Failed to fetch playlist",
       data: { error: "Failed to fetch playlist" },
     };
     return c.json(response, 500);
@@ -120,7 +114,6 @@ playlists.post("/", zValidator("json", CreatePlaylistSchema), (c) => {
     if (existing) {
       const response: ApiResponse<{ error: string }> = {
         status: 409,
-        message: "Playlist already exists",
         data: { error: "Playlist already exists" },
       };
       return c.json(response, 409);
@@ -142,7 +135,6 @@ playlists.post("/", zValidator("json", CreatePlaylistSchema), (c) => {
 
     const response: ApiResponse<Playlist> = {
       status: 201,
-      message: `Successfully created playlist: ${newPlaylist.name}`,
       data: newPlaylist,
     };
 
@@ -151,7 +143,6 @@ playlists.post("/", zValidator("json", CreatePlaylistSchema), (c) => {
     logService.error("Failed to create playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
-      message: "Failed to create playlist",
       data: { error: "Failed to create playlist" },
     };
     return c.json(response, 500);
@@ -168,7 +159,6 @@ playlists.put("/:id", zValidator("json", UpdatePlaylistSchema), (c) => {
   if (isNaN(id)) {
     const response: ApiResponse<{ error: string }> = {
       status: 400,
-      message: "Invalid playlist ID",
       data: { error: "Invalid playlist ID" },
     };
     return c.json(response, 400);
@@ -183,7 +173,6 @@ playlists.put("/:id", zValidator("json", UpdatePlaylistSchema), (c) => {
     if (!existing) {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
-        message: "Playlist not found",
         data: { error: "Playlist not found" },
       };
       return c.json(response, 404);
@@ -206,7 +195,6 @@ playlists.put("/:id", zValidator("json", UpdatePlaylistSchema), (c) => {
     if (updateFields.length === 0) {
       const response: ApiResponse<{ error: string }> = {
         status: 400,
-        message: "No fields to update",
         data: { error: "No fields to update" },
       };
       return c.json(response, 400);
@@ -225,7 +213,6 @@ playlists.put("/:id", zValidator("json", UpdatePlaylistSchema), (c) => {
 
     const response: ApiResponse<Playlist> = {
       status: 200,
-      message: `Successfully updated playlist: ${updatedPlaylist.name}`,
       data: updatedPlaylist,
     };
 
@@ -234,7 +221,6 @@ playlists.put("/:id", zValidator("json", UpdatePlaylistSchema), (c) => {
     logService.error("Failed to update playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
-      message: "Failed to update playlist",
       data: { error: "Failed to update playlist" },
     };
     return c.json(response, 500);
@@ -251,7 +237,6 @@ playlists.delete("/:id", (c) => {
   if (isNaN(id)) {
     const response: ApiResponse<{ error: string }> = {
       status: 400,
-      message: "Invalid playlist ID",
       data: { error: "Invalid playlist ID" },
     };
     return c.json(response, 400);
@@ -264,7 +249,6 @@ playlists.delete("/:id", (c) => {
     if (!existing) {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
-        message: "Playlist not found",
         data: { error: "Playlist not found" },
       };
       return c.json(response, 404);
@@ -277,7 +261,6 @@ playlists.delete("/:id", (c) => {
 
     const response: ApiResponse<{ success: boolean }> = {
       status: 200,
-      message: `Successfully deleted playlist: ${existing.name}`,
       data: { success: true },
     };
 
@@ -286,7 +269,6 @@ playlists.delete("/:id", (c) => {
     logService.error("Failed to delete playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
-      message: "Failed to delete playlist",
       data: { error: "Failed to delete playlist" },
     };
     return c.json(response, 500);
@@ -304,7 +286,6 @@ playlists.post("/:id/media/:mediaId", (c) => {
   if (isNaN(id) || isNaN(mediaId)) {
     const response: ApiResponse<{ error: string }> = {
       status: 400,
-      message: "Invalid playlist ID or media ID",
       data: { error: "Invalid playlist ID or media ID" },
     };
     return c.json(response, 400);
@@ -317,7 +298,6 @@ playlists.post("/:id/media/:mediaId", (c) => {
     if (!playlist) {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
-        message: "Playlist not found",
         data: { error: "Playlist not found" },
       };
       return c.json(response, 404);
@@ -329,7 +309,6 @@ playlists.post("/:id/media/:mediaId", (c) => {
     if (!media) {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
-        message: "Media file not found",
         data: { error: "Media file not found" },
       };
       return c.json(response, 404);
@@ -344,7 +323,6 @@ playlists.post("/:id/media/:mediaId", (c) => {
     if (existing) {
       const response: ApiResponse<{ error: string }> = {
         status: 409,
-        message: "Media already in playlist",
         data: { error: "Media already in playlist" },
       };
       return c.json(response, 409);
@@ -369,7 +347,6 @@ playlists.post("/:id/media/:mediaId", (c) => {
 
     const response: ApiResponse<{ success: boolean; sort_order: number }> = {
       status: 200,
-      message: `Successfully added media to playlist at position ${nextOrder}`,
       data: { success: true, sort_order: nextOrder },
     };
 
@@ -378,7 +355,6 @@ playlists.post("/:id/media/:mediaId", (c) => {
     logService.error("Failed to add media to playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
-      message: "Failed to add media to playlist",
       data: { error: "Failed to add media to playlist" },
     };
     return c.json(response, 500);
@@ -396,7 +372,6 @@ playlists.delete("/:id/media/:mediaId", (c) => {
   if (isNaN(id) || isNaN(mediaId)) {
     const response: ApiResponse<{ error: string }> = {
       status: 400,
-      message: "Invalid playlist ID or media ID",
       data: { error: "Invalid playlist ID or media ID" },
     };
     return c.json(response, 400);
@@ -412,7 +387,6 @@ playlists.delete("/:id/media/:mediaId", (c) => {
     if (!existing) {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
-        message: "Media not found in playlist",
         data: { error: "Media not found in playlist" },
       };
       return c.json(response, 404);
@@ -425,7 +399,6 @@ playlists.delete("/:id/media/:mediaId", (c) => {
 
     const response: ApiResponse<{ success: boolean }> = {
       status: 200,
-      message: "Successfully removed media from playlist",
       data: { success: true },
     };
 
@@ -434,7 +407,6 @@ playlists.delete("/:id/media/:mediaId", (c) => {
     logService.error("Failed to remove media from playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
-      message: "Failed to remove media from playlist",
       data: { error: "Failed to remove media from playlist" },
     };
     return c.json(response, 500);
@@ -451,7 +423,6 @@ playlists.put("/:id/reorder", zValidator("json", ReorderPlaylistSchema), (c) => 
   if (isNaN(id)) {
     const response: ApiResponse<{ error: string }> = {
       status: 400,
-      message: "Invalid playlist ID",
       data: { error: "Invalid playlist ID" },
     };
     return c.json(response, 400);
@@ -466,7 +437,6 @@ playlists.put("/:id/reorder", zValidator("json", ReorderPlaylistSchema), (c) => 
     if (!playlist) {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
-        message: "Playlist not found",
         data: { error: "Playlist not found" },
       };
       return c.json(response, 404);
@@ -488,7 +458,6 @@ playlists.put("/:id/reorder", zValidator("json", ReorderPlaylistSchema), (c) => 
 
     const response: ApiResponse<{ success: boolean }> = {
       status: 200,
-      message: `Successfully reordered playlist with ${body.mediaIds.length} items`,
       data: { success: true },
     };
 
@@ -497,7 +466,6 @@ playlists.put("/:id/reorder", zValidator("json", ReorderPlaylistSchema), (c) => 
     logService.error("Failed to reorder playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
-      message: "Failed to reorder playlist",
       data: { error: "Failed to reorder playlist" },
     };
     return c.json(response, 500);

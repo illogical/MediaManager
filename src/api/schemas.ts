@@ -111,7 +111,6 @@ export const MediaFileWithTagsSchema = MediaFileSchema.extend({
 // Response wrapper
 export const ApiResponseSchema = z.object({
   status: z.number(),
-  message: z.string(),
   data: z.unknown(),
 });
 
@@ -130,6 +129,5 @@ export type UpdatePlaylist = z.infer<typeof UpdatePlaylistSchema>;
 export type ReorderPlaylist = z.infer<typeof ReorderPlaylistSchema>;
 export type ApiResponse<T = unknown> = {
   status: number;
-  message: string;
   data: T;
 };

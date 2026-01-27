@@ -61,7 +61,6 @@ describe("HistoryService", () => {
       const result = historyService.getViewHistory();
 
       expect(result.status).toBe(200);
-      expect(result.message).toContain("Successfully retrieved 2 history entries");
       expect(result.data).toHaveLength(2);
       expect(result.data[0].file_name).toBe("test1.jpg");
     });
@@ -92,7 +91,6 @@ describe("HistoryService", () => {
       const result = historyService.getViewHistory();
 
       expect(result.status).toBe(200);
-      expect(result.message).toContain("Successfully retrieved 0 history entries");
       expect(result.data).toHaveLength(0);
     });
 
@@ -104,7 +102,6 @@ describe("HistoryService", () => {
       const result = historyService.getViewHistory();
 
       expect(result.status).toBe(500);
-      expect(result.message).toBe("Failed to fetch view history");
       expect(result.data).toHaveLength(0);
     });
   });
