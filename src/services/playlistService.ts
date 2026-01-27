@@ -99,10 +99,10 @@ export class PlaylistService {
         throw new Error("Playlist already exists");
       }
 
-      // Create new playlist
+      // Create new playlist - convert empty description to null
       const result = sqlService.execute("INSERT INTO Playlists (name, description) VALUES (?, ?)", [
         name,
-        description || null,
+        description ?? null,
       ]);
 
       logService.info(`Created playlist: ${name}`);
@@ -141,14 +141,14 @@ export class PlaylistService {
       const updateFields: string[] = [];
       const updateValues: unknown[] = [];
 
-      if (updates.name) {
+      if (updates.name !== undefined) {
         updateFields.push("name = ?");
         updateValues.push(updates.name);
       }
 
       if (updates.description !== undefined) {
         updateFields.push("description = ?");
-        updateValues.push(updates.description || null);
+        updateValues.push(updates.description ?? null);
       }
 
       if (updateFields.length === 0) {
