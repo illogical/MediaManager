@@ -1,14 +1,14 @@
 # Project Roadmap
 
 ## Phase 1: Data Seeding & Randomization Foundations
-- [ ] Create a database creation script using the schema in documentation/planning/DATABASE.md.
-- [ ] Add a sample JSON file with seed data for all tables (folders, media, tags, playlists, history, randomization sessions, config).
-- [ ] Implement a seed ingestion script that reads the JSON file and populates the SQLite database.
+- [x] Create a database creation script using the schema in documentation/planning/DATABASE.md.
+- [x] Add a sample JSON file with seed data for all tables (folders, media, tags, playlists, history, randomization sessions, config).
+- [x] Implement a seed ingestion script that reads the JSON file and populates the SQLite database.
 - [ ] Scaffold randomizationService.ts and add initial unit tests covering core ordering/randomness logic.
 
 ## Phase 2: Backend & API Wiring (Bun.js)
-- [ ] Setup Bun.js server environment.
-- [ ] Build API endpoints for media fetching, tagging, randomization, and playlists.
+- [x] Setup Bun.js server environment.
+- [x] Build API endpoints for media fetching, tagging, randomization, and playlists.
 - [ ] Connect frontend components to real API data.
 
 ## Phase 3: UI Foundations & Core Viewer

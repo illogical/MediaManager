@@ -47,16 +47,23 @@
     - [x] Endpoint: PUT /api/playlists/:id/reorder - Reorder playlist media
     - [ ] Endpoint: GET /api/randomize - Get randomized media list with session
     - [ ] Endpoint: DELETE /api/media/disliked - Bulk move disliked files
-    - [ ] Endpoint: POST /api/scan - Trigger manual folder scan
-- [ ] Refactor application logic to a service layer
-    - [ ] Move the /api/media and /api/tags and /api/history endpoints' database logic to new mediaService class
-    - [ ] Refactor the media, tags, and history API routes to leverage the new mediaService.
+    - [ ] Endpoint: POST /api/scan - Trigger manual rescan of existing folder
+- [x] Refactor application logic to a service layer
+    - [x] Move the /api/media and /api/tags and /api/history endpoints' database logic to new mediaService class
+    - [x] Refactor the media, tags, and history API routes to leverage the new mediaService.
     - [ ] Move the /api/playlist endpoints' database logic to new playlistService class.
     - [ ] Refactor the playlist route to leverage the new playlistService.
-- [ ] Create an new fileSystemService.ts class
-    - [ ] Add a scan(folderPath: string, extensions: string[]) function and output a MediaFileSchema array
-        - [ ] Index files containing the provided file extensions found in the provided folderPath
-    - [ ] Add a addFolderToLibrary(folderPath: string) function to use the scan function's output to store the folder path in the Folders SQL table file paths to the MediaFiles table
+- [x] Create an new fileSystemService.ts class
+    - [x] Add a scan(folderPath: string, extensions: string[]) function and output a MediaFileSchema array
+        - [x] Index files containing the provided file extensions found in the provided folderPath
+    - [x] Add a createFolder(folderPath: string) function to store the folder path in the Folders SQL table and index file paths to the MediaFiles table
+- [ ] Create a new playlistService.ts class
+    - [ ] Move all SQL statements from playlists.ts route to playlistService methods
+    - [ ] Implement playlist CRUD methods (create, read, update, delete)
+    - [ ] Implement playlist media management (addMedia, removeMedia, reorderMedia)
+    - [ ] Add comprehensive logging and error handling
+- [ ] Refactor playlists route to use playlistService
+    - [ ] Update route handlers to call playlistService methods instead of direct SQL queries
 - [ ] Document localStorage schema in SPECIFICATION.md
     - [ ] Current session state structure
     - [ ] Last viewed media reference
@@ -259,13 +266,12 @@
     - [x] Transaction support (executeMany)
     - [x] Error handling and logging
     - [x] Added trace logging to all methods
-- [ ] Implement Media Discovery service (`server/services/scanner.ts`)
-    - [ ] Recursive folder scanning (readdir)
-    - [ ] Filter for image file extensions (.jpg, .png, .gif, .webp)
-    - [ ] Extract image metadata with sharp library
-    - [ ] Generate file hashes for duplicate detection (crypto)
-    - [ ] Upsert into MediaFiles table
-    - [ ] Handle deleted files (mark is_deleted)
+- [x] Implement Media Discovery service (fileSystemService.ts)
+    - [x] Recursive folder scanning (readdir)
+    - [x] Filter for image and video file extensions (11 formats: jpg, jpeg, png, gif, webp, mp4, avi, mov, mkv, wmv, webm)
+    - [x] Extract file metadata (size, MIME type, created date)
+    - [x] Batch insert for optimal database performance
+    - [x] Handle folder creation with UNIQUE constraint detection
 - [ ] Implement Thumbnail Generation service (`server/services/thumbnails.ts`)
     - [ ] Use sharp library for image resizing
     - [ ] Generate 3 sizes: small (200px), medium (400px), large (800px)
@@ -280,7 +286,7 @@
     - [x] Request logging middleware with millisecond timestamps
     - [x] Standard response format: { status: number, data: any }
     - [ ] Static file serving for thumbnails
-- [x] Implement Media endpoints (`src/api/routes/media.ts`)
+- [x] Implement Media endpoints (`src/api/routes/media.ts`) using mediaService
     - [x] GET /api/media - List with filters and sort (folder, type, tags, sort, limit, offset)
     - [x] GET /api/media/:id - Single media details
     - [x] POST /api/media/:id/view - Increment view count
@@ -291,17 +297,21 @@
     - [x] DELETE /api/media/:id/tags/:tagId - Remove tag from media
     - [ ] GET /api/media/:id/file - Serve actual file
     - [ ] GET /api/thumbnails/:id - Serve thumbnail
-- [x] Implement Tag endpoints (`src/api/routes/tags.ts`)
+- [x] Implement Tag endpoints (`src/api/routes/tags.ts`) using mediaService
     - [x] GET /api/tags - List all tags
     - [x] POST /api/tags - Create new tag
 - [x] Implement History endpoints (`src/api/routes/history.ts`)
     - [x] GET /api/history - Last 20 items with media details
+- [ ] History maintenance (LOW PRIORITY)
     - [ ] Cleanup old history entries (keep last 100)
+    - [ ] Implement periodic cleanup or on-demand trigger
 - [x] Implement Folder endpoints (`src/api/routes/folders.ts`)
     - [x] GET /api/folders - List configured folders
-    - [ ] POST /api/scan - Trigger manual scan
-    - [ ] Read from config/folders.json
-    - [ ] Return scan progress/results
+    - [x] POST /api/folders - Create folder and index media files
+- [ ] Implement rescan endpoint (`src/api/routes/folders.ts`)
+    - [ ] POST /api/scan - Trigger rescan of existing folder (different from initial folder creation)
+    - [ ] Accept folder ID or path parameter
+    - [ ] Return scan results (filesAdded, filesSkipped, errors)
 - [x] Implement Playlist endpoints (`src/api/routes/playlists.ts`)
     - [x] GET /api/playlists - List all playlists
     - [x] GET /api/playlists/:id - Get playlist with media order
