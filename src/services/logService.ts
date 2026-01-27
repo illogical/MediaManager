@@ -3,6 +3,7 @@
  */
 
 export enum LogLevel {
+  TRACE = "TRACE",
   INFO = "INFO",
   WARN = "WARN",
   ERROR = "ERROR",
@@ -22,6 +23,13 @@ class LogService {
    */
   private formatMessage(level: LogLevel, message: string): string {
     return `[${this.getTimestamp()}] [${level}] ${message}`;
+  }
+
+  /**
+   * Log trace message
+   */
+  trace(message: string): void {
+    console.log(this.formatMessage(LogLevel.TRACE, message));
   }
 
   /**
