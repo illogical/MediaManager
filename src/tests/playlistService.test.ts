@@ -14,6 +14,7 @@ vi.mock("../services/sqlService", () => {
       queryAll: vi.fn(),
       queryOne: vi.fn(),
       execute: vi.fn(),
+      executeMany: vi.fn(),
     },
     SqlService: vi.fn(),
   };
@@ -531,37 +532,32 @@ describe("PlaylistService", () => {
   describe("reorderPlaylistMedia", () => {
     it("should reorder playlist media", () => {
       mockSqlService.queryOne.mockReturnValue({ id: 1, name: "Playlist" });
-      mockSqlService.execute.mockReturnValue({
-        changes: 1,
-        lastInsertRowid: 1,
-      });
+      mockSqlService.executeMany.mockReturnValue();
 
       const mediaIds = [3, 1, 2];
       const result = playlistService.reorderPlaylistMedia(1, mediaIds);
 
       expect(result.success).toBe(true);
-      // Should be called 4 times: 1 DELETE + 3 INSERTs
-      expect(mockSqlService.execute).toHaveBeenCalledTimes(4);
-      expect(mockSqlService.execute).toHaveBeenNthCalledWith(
-        1,
-        "DELETE FROM PlaylistMediaOrder WHERE playlist_id = ?",
-        [1]
-      );
-      expect(mockSqlService.execute).toHaveBeenNthCalledWith(
-        2,
-        "INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)",
-        [1, 3, 0]
-      );
-      expect(mockSqlService.execute).toHaveBeenNthCalledWith(
-        3,
-        "INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)",
-        [1, 1, 1]
-      );
-      expect(mockSqlService.execute).toHaveBeenNthCalledWith(
-        4,
-        "INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)",
-        [1, 2, 2]
-      );
+      // Should call executeMany once with statements for DELETE + 3 INSERTs
+      expect(mockSqlService.executeMany).toHaveBeenCalledTimes(1);
+      expect(mockSqlService.executeMany).toHaveBeenCalledWith([
+        {
+          sql: "DELETE FROM PlaylistMediaOrder WHERE playlist_id = ?",
+          params: [1],
+        },
+        {
+          sql: "INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)",
+          params: [1, 3, 0],
+        },
+        {
+          sql: "INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)",
+          params: [1, 1, 1],
+        },
+        {
+          sql: "INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)",
+          params: [1, 2, 2],
+        },
+      ]);
     });
 
     it("should throw if playlist not found", () => {
@@ -572,7 +568,7 @@ describe("PlaylistService", () => {
 
     it("should throw on database errors", () => {
       mockSqlService.queryOne.mockReturnValue({ id: 1, name: "Playlist" });
-      mockSqlService.execute.mockImplementation(() => {
+      mockSqlService.executeMany.mockImplementation(() => {
         throw new Error("Database error");
       });
 

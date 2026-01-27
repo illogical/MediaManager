@@ -307,17 +307,24 @@ export class PlaylistService {
         throw new Error("Playlist not found");
       }
 
-      // Delete all current entries for this playlist
-      sqlService.execute("DELETE FROM PlaylistMediaOrder WHERE playlist_id = ?", [playlistId]);
+      // Build transaction statements
+      const statements = [
+        {
+          sql: "DELETE FROM PlaylistMediaOrder WHERE playlist_id = ?",
+          params: [playlistId],
+        },
+      ];
 
-      // Insert new ordering
+      // Add INSERT statements for each media item
       for (let i = 0; i < mediaIds.length; i++) {
-        sqlService.execute("INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)", [
-          playlistId,
-          mediaIds[i],
-          i,
-        ]);
+        statements.push({
+          sql: "INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)",
+          params: [playlistId, mediaIds[i], i],
+        });
       }
+
+      // Execute all statements in a transaction
+      sqlService.executeMany(statements);
 
       logService.info(`Reordered playlist ID ${playlistId} with ${mediaIds.length} items`);
 
