@@ -48,6 +48,15 @@
     - [ ] Endpoint: GET /api/randomize - Get randomized media list with session
     - [ ] Endpoint: DELETE /api/media/disliked - Bulk move disliked files
     - [ ] Endpoint: POST /api/scan - Trigger manual folder scan
+- [ ] Refactor application logic to a service layer
+    - [ ] Move the /api/media and /api/tags and /api/history endpoints' database logic to new mediaService class
+    - [ ] Refactor the media, tags, and history API routes to leverage the new mediaService.
+    - [ ] Move the /api/playlist endpoints' database logic to new playlistService class.
+    - [ ] Refactor the playlist route to leverage the new playlistService.
+- [ ] Create an new fileSystemService.ts class
+    - [ ] Add a scan(folderPath: string, extensions: string[]) function and output a MediaFileSchema array
+        - [ ] Index files containing the provided file extensions found in the provided folderPath
+    - [ ] Add a addFolderToLibrary(folderPath: string) function to use the scan function's output to store the folder path in the Folders SQL table file paths to the MediaFiles table
 - [ ] Document localStorage schema in SPECIFICATION.md
     - [ ] Current session state structure
     - [ ] Last viewed media reference
