@@ -24,10 +24,13 @@ tags.get("/", (c) => {
     });
   } catch (error) {
     logService.error("Failed to fetch tags", error as Error);
-    return c.json({
-      status: 500,
-      data: [],
-    }, 500);
+    return c.json(
+      {
+        status: 500,
+        data: [],
+      },
+      500
+    );
   }
 });
 
@@ -43,17 +46,23 @@ tags.post("/", zValidator("json", CreateTagSchema), (c) => {
     const body = c.req.valid("json");
     const tag = mediaService.createTag(body.name);
 
-    return c.json({
-      status: 201,
-      data: tag,
-    }, 201);
+    return c.json(
+      {
+        status: 201,
+        data: tag,
+      },
+      201
+    );
   } catch (error) {
     logService.error("Failed to create tag", error as Error);
-    
-    return c.json({
-      status: 500,
-      data: null,
-    }, 500);
+
+    return c.json(
+      {
+        status: 500,
+        data: null,
+      },
+      500
+    );
   }
 });
 

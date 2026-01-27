@@ -4,12 +4,7 @@
 
 import { sqlService } from "./sqlService";
 import { logService } from "./logService";
-import type {
-  MediaFile,
-  MediaFileWithTags,
-  MediaListQuery,
-  Tag,
-} from "../api/schemas";
+import type { MediaFile, MediaFileWithTags, MediaListQuery, Tag } from "../api/schemas";
 
 export class MediaService {
   /**
@@ -108,10 +103,7 @@ export class MediaService {
     logService.trace(`MediaService.getMediaFileById(${id}) called`);
 
     try {
-      const media = sqlService.queryOne<MediaFile>(
-        "SELECT * FROM MediaFiles WHERE id = ? AND is_deleted = 0",
-        [id]
-      );
+      const media = sqlService.queryOne<MediaFile>("SELECT * FROM MediaFiles WHERE id = ? AND is_deleted = 0", [id]);
 
       if (!media) {
         logService.warn(`Media file not found: ${id}`);
@@ -169,10 +161,7 @@ export class MediaService {
 
     try {
       // Check if media exists
-      const media = sqlService.queryOne<MediaFile>(
-        "SELECT * FROM MediaFiles WHERE id = ? AND is_deleted = 0",
-        [id]
-      );
+      const media = sqlService.queryOne<MediaFile>("SELECT * FROM MediaFiles WHERE id = ? AND is_deleted = 0", [id]);
 
       if (!media) {
         logService.warn(`Media file not found for view count increment: ${id}`);
@@ -212,10 +201,7 @@ export class MediaService {
 
     try {
       // Check if media exists
-      const media = sqlService.queryOne<MediaFile>(
-        "SELECT * FROM MediaFiles WHERE id = ? AND is_deleted = 0",
-        [id]
-      );
+      const media = sqlService.queryOne<MediaFile>("SELECT * FROM MediaFiles WHERE id = ? AND is_deleted = 0", [id]);
 
       if (!media) {
         logService.warn(`Media file not found for like count increment: ${id}`);
@@ -251,10 +237,7 @@ export class MediaService {
 
     try {
       // Check if media exists
-      const media = sqlService.queryOne<MediaFile>(
-        "SELECT * FROM MediaFiles WHERE id = ? AND is_deleted = 0",
-        [id]
-      );
+      const media = sqlService.queryOne<MediaFile>("SELECT * FROM MediaFiles WHERE id = ? AND is_deleted = 0", [id]);
 
       if (!media) {
         logService.warn(`Media file not found for dislike: ${id}`);
@@ -290,10 +273,7 @@ export class MediaService {
 
     try {
       // Check if media exists
-      const mediaCheck = sqlService.queryOne(
-        "SELECT id FROM MediaFiles WHERE id = ? AND is_deleted = 0",
-        [mediaId]
-      );
+      const mediaCheck = sqlService.queryOne("SELECT id FROM MediaFiles WHERE id = ? AND is_deleted = 0", [mediaId]);
 
       if (!mediaCheck) {
         logService.warn(`Media file not found for adding tag: ${mediaId}`);
@@ -307,9 +287,7 @@ export class MediaService {
         // Tag doesn't exist, create it
         logService.info(`Creating new tag: ${tagName}`);
         const result = sqlService.execute("INSERT INTO Tags (name) VALUES (?)", [tagName]);
-        tag = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE id = ?", [
-          result.lastInsertRowid,
-        ]);
+        tag = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE id = ?", [result.lastInsertRowid]);
 
         if (!tag) {
           throw new Error("Failed to create tag");
@@ -317,10 +295,10 @@ export class MediaService {
       }
 
       // Check if relationship already exists
-      const existing = sqlService.queryOne(
-        "SELECT * FROM MediaTags WHERE media_id = ? AND tag_id = ?",
-        [mediaId, tag.id]
-      );
+      const existing = sqlService.queryOne("SELECT * FROM MediaTags WHERE media_id = ? AND tag_id = ?", [
+        mediaId,
+        tag.id,
+      ]);
 
       if (existing) {
         logService.warn(`Tag '${tagName}' already applied to media ${mediaId}`);
@@ -328,10 +306,7 @@ export class MediaService {
       }
 
       // Add tag to media
-      sqlService.execute("INSERT INTO MediaTags (media_id, tag_id) VALUES (?, ?)", [
-        mediaId,
-        tag.id,
-      ]);
+      sqlService.execute("INSERT INTO MediaTags (media_id, tag_id) VALUES (?, ?)", [mediaId, tag.id]);
 
       logService.info(`Added tag '${tagName}' to media ID ${mediaId}`);
 
@@ -350,10 +325,10 @@ export class MediaService {
 
     try {
       // Check if relationship exists
-      const existing = sqlService.queryOne(
-        "SELECT * FROM MediaTags WHERE media_id = ? AND tag_id = ?",
-        [mediaId, tagId]
-      );
+      const existing = sqlService.queryOne("SELECT * FROM MediaTags WHERE media_id = ? AND tag_id = ?", [
+        mediaId,
+        tagId,
+      ]);
 
       if (!existing) {
         logService.warn(`Tag ${tagId} not found on media ${mediaId}`);
@@ -361,10 +336,7 @@ export class MediaService {
       }
 
       // Remove tag from media
-      sqlService.execute("DELETE FROM MediaTags WHERE media_id = ? AND tag_id = ?", [
-        mediaId,
-        tagId,
-      ]);
+      sqlService.execute("DELETE FROM MediaTags WHERE media_id = ? AND tag_id = ?", [mediaId, tagId]);
 
       logService.info(`Removed tag ID ${tagId} from media ID ${mediaId}`);
 
@@ -415,9 +387,7 @@ export class MediaService {
 
       logService.info(`Created tag: ${name}`);
 
-      const newTag = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE id = ?", [
-        result.lastInsertRowid,
-      ]);
+      const newTag = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE id = ?", [result.lastInsertRowid]);
 
       if (!newTag) {
         throw new Error("Failed to retrieve created tag");

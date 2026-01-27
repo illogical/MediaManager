@@ -4,7 +4,7 @@
 
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { sqlService } from "../../services/sqlService";
+import { playlistService } from "../../services/playlistService";
 import { logService } from "../../services/logService";
 import {
   CreatePlaylistSchema,
@@ -23,9 +23,7 @@ playlists.get("/", (c) => {
   logService.trace("GET /api/playlists called");
 
   try {
-    const results = sqlService.queryAll<Playlist>("SELECT * FROM Playlists ORDER BY name ASC");
-
-    logService.info(`Retrieved ${results.length} playlists`);
+    const results = playlistService.getAllPlaylists();
 
     const response: ApiResponse<Playlist[]> = {
       status: 200,
@@ -59,9 +57,9 @@ playlists.get("/:id", (c) => {
   }
 
   try {
-    const playlist = sqlService.queryOne<Playlist>("SELECT * FROM Playlists WHERE id = ?", [id]);
+    const result = playlistService.getPlaylistWithMedia(id);
 
-    if (!playlist) {
+    if (!result) {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
         data: { error: "Playlist not found" },
@@ -69,23 +67,9 @@ playlists.get("/:id", (c) => {
       return c.json(response, 404);
     }
 
-    // Get media in playlist
-    const media = sqlService.queryAll(
-      `
-      SELECT m.*, pmo.sort_order
-      FROM MediaFiles m
-      JOIN PlaylistMediaOrder pmo ON m.id = pmo.media_id
-      WHERE pmo.playlist_id = ? AND m.is_deleted = 0
-      ORDER BY pmo.sort_order ASC
-    `,
-      [id]
-    );
-
-    logService.info(`Retrieved playlist: ${playlist.name} with ${media.length} items`);
-
     const response: ApiResponse<{ playlist: Playlist; media: unknown[] }> = {
       status: 200,
-      data: { playlist, media },
+      data: result,
     };
 
     return c.json(response);
@@ -108,30 +92,7 @@ playlists.post("/", zValidator("json", CreatePlaylistSchema), (c) => {
   const body = c.req.valid("json");
 
   try {
-    // Check if playlist already exists
-    const existing = sqlService.queryOne<Playlist>("SELECT * FROM Playlists WHERE name = ?", [body.name]);
-
-    if (existing) {
-      const response: ApiResponse<{ error: string }> = {
-        status: 409,
-        data: { error: "Playlist already exists" },
-      };
-      return c.json(response, 409);
-    }
-
-    // Create new playlist
-    const result = sqlService.execute("INSERT INTO Playlists (name, description) VALUES (?, ?)", [
-      body.name,
-      body.description || null,
-    ]);
-
-    logService.info(`Created playlist: ${body.name}`);
-
-    const newPlaylist = sqlService.queryOne<Playlist>("SELECT * FROM Playlists WHERE id = ?", [result.lastInsertRowid]);
-
-    if (!newPlaylist) {
-      throw new Error("Failed to retrieve created playlist");
-    }
+    const newPlaylist = playlistService.createPlaylist(body.name, body.description);
 
     const response: ApiResponse<Playlist> = {
       status: 201,
@@ -140,6 +101,14 @@ playlists.post("/", zValidator("json", CreatePlaylistSchema), (c) => {
 
     return c.json(response, 201);
   } catch (error) {
+    const err = error as Error;
+    if (err.message === "Playlist already exists") {
+      const response: ApiResponse<{ error: string }> = {
+        status: 409,
+        data: { error: "Playlist already exists" },
+      };
+      return c.json(response, 409);
+    }
     logService.error("Failed to create playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
@@ -167,49 +136,7 @@ playlists.put("/:id", zValidator("json", UpdatePlaylistSchema), (c) => {
   const body = c.req.valid("json");
 
   try {
-    // Check if playlist exists
-    const existing = sqlService.queryOne<Playlist>("SELECT * FROM Playlists WHERE id = ?", [id]);
-
-    if (!existing) {
-      const response: ApiResponse<{ error: string }> = {
-        status: 404,
-        data: { error: "Playlist not found" },
-      };
-      return c.json(response, 404);
-    }
-
-    // Update playlist
-    const updateFields: string[] = [];
-    const updateValues: unknown[] = [];
-
-    if (body.name) {
-      updateFields.push("name = ?");
-      updateValues.push(body.name);
-    }
-
-    if (body.description !== undefined) {
-      updateFields.push("description = ?");
-      updateValues.push(body.description || null);
-    }
-
-    if (updateFields.length === 0) {
-      const response: ApiResponse<{ error: string }> = {
-        status: 400,
-        data: { error: "No fields to update" },
-      };
-      return c.json(response, 400);
-    }
-
-    updateValues.push(id);
-    sqlService.execute(`UPDATE Playlists SET ${updateFields.join(", ")} WHERE id = ?`, updateValues);
-
-    logService.info(`Updated playlist: ${body.name || existing.name}`);
-
-    const updatedPlaylist = sqlService.queryOne<Playlist>("SELECT * FROM Playlists WHERE id = ?", [id]);
-
-    if (!updatedPlaylist) {
-      throw new Error("Failed to retrieve updated playlist");
-    }
+    const updatedPlaylist = playlistService.updatePlaylist(id, body);
 
     const response: ApiResponse<Playlist> = {
       status: 200,
@@ -218,6 +145,21 @@ playlists.put("/:id", zValidator("json", UpdatePlaylistSchema), (c) => {
 
     return c.json(response);
   } catch (error) {
+    const err = error as Error;
+    if (err.message === "Playlist not found") {
+      const response: ApiResponse<{ error: string }> = {
+        status: 404,
+        data: { error: "Playlist not found" },
+      };
+      return c.json(response, 404);
+    }
+    if (err.message === "No fields to update") {
+      const response: ApiResponse<{ error: string }> = {
+        status: 400,
+        data: { error: "No fields to update" },
+      };
+      return c.json(response, 400);
+    }
     logService.error("Failed to update playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
@@ -243,29 +185,23 @@ playlists.delete("/:id", (c) => {
   }
 
   try {
-    // Check if playlist exists
-    const existing = sqlService.queryOne<Playlist>("SELECT * FROM Playlists WHERE id = ?", [id]);
+    const result = playlistService.deletePlaylist(id);
 
-    if (!existing) {
+    const response: ApiResponse<{ success: boolean }> = {
+      status: 200,
+      data: result,
+    };
+
+    return c.json(response);
+  } catch (error) {
+    const err = error as Error;
+    if (err.message === "Playlist not found") {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
         data: { error: "Playlist not found" },
       };
       return c.json(response, 404);
     }
-
-    // Delete playlist (cascade will handle PlaylistMediaOrder)
-    sqlService.execute("DELETE FROM Playlists WHERE id = ?", [id]);
-
-    logService.info(`Deleted playlist: ${existing.name}`);
-
-    const response: ApiResponse<{ success: boolean }> = {
-      status: 200,
-      data: { success: true },
-    };
-
-    return c.json(response);
-  } catch (error) {
     logService.error("Failed to delete playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
@@ -292,66 +228,37 @@ playlists.post("/:id/media/:mediaId", (c) => {
   }
 
   try {
-    // Check if playlist exists
-    const playlist = sqlService.queryOne("SELECT * FROM Playlists WHERE id = ?", [id]);
+    const result = playlistService.addMediaToPlaylist(id, mediaId);
 
-    if (!playlist) {
+    const response: ApiResponse<{ success: boolean; sort_order: number }> = {
+      status: 200,
+      data: result,
+    };
+
+    return c.json(response);
+  } catch (error) {
+    const err = error as Error;
+    if (err.message === "Playlist not found") {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
         data: { error: "Playlist not found" },
       };
       return c.json(response, 404);
     }
-
-    // Check if media exists
-    const media = sqlService.queryOne("SELECT * FROM MediaFiles WHERE id = ? AND is_deleted = 0", [mediaId]);
-
-    if (!media) {
+    if (err.message === "Media file not found") {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
         data: { error: "Media file not found" },
       };
       return c.json(response, 404);
     }
-
-    // Check if already in playlist
-    const existing = sqlService.queryOne("SELECT * FROM PlaylistMediaOrder WHERE playlist_id = ? AND media_id = ?", [
-      id,
-      mediaId,
-    ]);
-
-    if (existing) {
+    if (err.message === "Media already in playlist") {
       const response: ApiResponse<{ error: string }> = {
         status: 409,
         data: { error: "Media already in playlist" },
       };
       return c.json(response, 409);
     }
-
-    // Get next sort order
-    const maxOrder = sqlService.queryOne<{ max_order: number | null }>(
-      "SELECT MAX(sort_order) as max_order FROM PlaylistMediaOrder WHERE playlist_id = ?",
-      [id]
-    );
-
-    const nextOrder = (maxOrder?.max_order ?? -1) + 1;
-
-    // Add media to playlist
-    sqlService.execute("INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)", [
-      id,
-      mediaId,
-      nextOrder,
-    ]);
-
-    logService.info(`Added media ID ${mediaId} to playlist ID ${id} at position ${nextOrder}`);
-
-    const response: ApiResponse<{ success: boolean; sort_order: number }> = {
-      status: 200,
-      data: { success: true, sort_order: nextOrder },
-    };
-
-    return c.json(response);
-  } catch (error) {
     logService.error("Failed to add media to playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
@@ -378,32 +285,23 @@ playlists.delete("/:id/media/:mediaId", (c) => {
   }
 
   try {
-    // Check if relationship exists
-    const existing = sqlService.queryOne("SELECT * FROM PlaylistMediaOrder WHERE playlist_id = ? AND media_id = ?", [
-      id,
-      mediaId,
-    ]);
+    const result = playlistService.removeMediaFromPlaylist(id, mediaId);
 
-    if (!existing) {
+    const response: ApiResponse<{ success: boolean }> = {
+      status: 200,
+      data: result,
+    };
+
+    return c.json(response);
+  } catch (error) {
+    const err = error as Error;
+    if (err.message === "Media not found in playlist") {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
         data: { error: "Media not found in playlist" },
       };
       return c.json(response, 404);
     }
-
-    // Remove media from playlist
-    sqlService.execute("DELETE FROM PlaylistMediaOrder WHERE playlist_id = ? AND media_id = ?", [id, mediaId]);
-
-    logService.info(`Removed media ID ${mediaId} from playlist ID ${id}`);
-
-    const response: ApiResponse<{ success: boolean }> = {
-      status: 200,
-      data: { success: true },
-    };
-
-    return c.json(response);
-  } catch (error) {
     logService.error("Failed to remove media from playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
@@ -431,38 +329,23 @@ playlists.put("/:id/reorder", zValidator("json", ReorderPlaylistSchema), (c) => 
   const body = c.req.valid("json");
 
   try {
-    // Check if playlist exists
-    const playlist = sqlService.queryOne("SELECT * FROM Playlists WHERE id = ?", [id]);
+    const result = playlistService.reorderPlaylistMedia(id, body.mediaIds);
 
-    if (!playlist) {
+    const response: ApiResponse<{ success: boolean }> = {
+      status: 200,
+      data: result,
+    };
+
+    return c.json(response);
+  } catch (error) {
+    const err = error as Error;
+    if (err.message === "Playlist not found") {
       const response: ApiResponse<{ error: string }> = {
         status: 404,
         data: { error: "Playlist not found" },
       };
       return c.json(response, 404);
     }
-
-    // Delete all current entries for this playlist
-    sqlService.execute("DELETE FROM PlaylistMediaOrder WHERE playlist_id = ?", [id]);
-
-    // Insert new ordering
-    for (let i = 0; i < body.mediaIds.length; i++) {
-      sqlService.execute("INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)", [
-        id,
-        body.mediaIds[i],
-        i,
-      ]);
-    }
-
-    logService.info(`Reordered playlist ID ${id} with ${body.mediaIds.length} items`);
-
-    const response: ApiResponse<{ success: boolean }> = {
-      status: 200,
-      data: { success: true },
-    };
-
-    return c.json(response);
-  } catch (error) {
     logService.error("Failed to reorder playlist", error as Error);
     const response: ApiResponse<{ error: string }> = {
       status: 500,
