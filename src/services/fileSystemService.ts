@@ -129,11 +129,13 @@ export class FileSystemService {
         }
 
         if (entry.isDirectory()) {
-          logService.warn(`Skipping folder: ${fullPath}`);
           if (options.recursive) {
             // Recursively scan subdirectories
+            logService.trace(`Scanning subdirectory: ${fullPath}`);
             const subFiles = this.scanDirectory(fullPath, options);
             files.push(...subFiles);
+          } else {
+            logService.warn(`Skipping folder: ${fullPath}`);
           }
         } else if (entry.isFile()) {
           if (this.isSupportedExtension(fullPath)) {
