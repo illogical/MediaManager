@@ -60,9 +60,8 @@ describe("HistoryService", () => {
 
       const result = historyService.getViewHistory();
 
-      expect(result.status).toBe(200);
-      expect(result.data).toHaveLength(2);
-      expect(result.data[0].file_name).toBe("test1.jpg");
+      expect(result).toHaveLength(2);
+      expect(result[0].file_name).toBe("test1.jpg");
     });
 
     it("should return view history with custom limit", () => {
@@ -81,8 +80,7 @@ describe("HistoryService", () => {
 
       const result = historyService.getViewHistory(50);
 
-      expect(result.status).toBe(200);
-      expect(result.data).toHaveLength(50);
+      expect(result).toHaveLength(50);
     });
 
     it("should return empty array when no history found", () => {
@@ -90,19 +88,15 @@ describe("HistoryService", () => {
 
       const result = historyService.getViewHistory();
 
-      expect(result.status).toBe(200);
-      expect(result.data).toHaveLength(0);
+      expect(result).toHaveLength(0);
     });
 
-    it("should handle errors and return 500 status", () => {
+    it("should throw error when database query fails", () => {
       mockSqlService.queryAll.mockImplementation(() => {
         throw new Error("Database error");
       });
 
-      const result = historyService.getViewHistory();
-
-      expect(result.status).toBe(500);
-      expect(result.data).toHaveLength(0);
+      expect(() => historyService.getViewHistory()).toThrow("Database error");
     });
   });
 });

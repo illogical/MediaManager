@@ -76,9 +76,8 @@ describe("MediaService", () => {
         offset: 0,
       });
 
-      expect(result.status).toBe(200);
-      expect(result.data).toHaveLength(1);
-      expect(result.data[0].tags).toEqual(mockTags);
+      expect(result).toHaveLength(1);
+      expect(result[0].tags).toEqual(mockTags);
     });
 
     it("should return empty array when no media files found", () => {
@@ -90,23 +89,21 @@ describe("MediaService", () => {
         offset: 0,
       });
 
-      expect(result.status).toBe(200);
-      expect(result.data).toHaveLength(0);
+      expect(result).toHaveLength(0);
     });
 
-    it("should handle errors and return 500 status", () => {
+    it("should throw on database errors", () => {
       mockSqlService.queryAll.mockImplementation(() => {
         throw new Error("Database error");
       });
 
-      const result = mediaService.getMediaFiles({
-        sort: "created_date_desc",
-        limit: 30,
-        offset: 0,
-      });
-
-      expect(result.status).toBe(500);
-      expect(result.data).toHaveLength(0);
+      expect(() =>
+        mediaService.getMediaFiles({
+          sort: "created_date_desc",
+          limit: 30,
+          offset: 0,
+        })
+      ).toThrow("Database error");
     });
   });
 
@@ -139,18 +136,25 @@ describe("MediaService", () => {
 
       const result = mediaService.getMediaFileById(1);
 
-      expect(result.status).toBe(200);
-      expect(result.data?.id).toBe(1);
-      expect(result.data?.tags).toEqual(mockTags);
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe(1);
+      expect(result?.tags).toEqual(mockTags);
     });
 
-    it("should return 404 when media file not found", () => {
+    it("should return null when media file not found", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 
       const result = mediaService.getMediaFileById(999);
 
-      expect(result.status).toBe(404);
-      expect(result.data).toBeNull();
+      expect(result).toBeNull();
+    });
+
+    it("should throw on database errors", () => {
+      mockSqlService.queryOne.mockImplementation(() => {
+        throw new Error("Database error");
+      });
+
+      expect(() => mediaService.getMediaFileById(1)).toThrow("Database error");
     });
   });
 
@@ -179,17 +183,16 @@ describe("MediaService", () => {
 
       const result = mediaService.incrementViewCount(1);
 
-      expect(result.status).toBe(200);
-      expect(result.data.view_count).toBe(6);
+      expect(result.view_count).toBe(6);
       expect(mockSqlService.execute).toHaveBeenCalledTimes(2); // UPDATE and INSERT
     });
 
-    it("should return 404 when media not found", () => {
+    it("should throw when media not found", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 
-      const result = mediaService.incrementViewCount(999);
-
-      expect(result.status).toBe(404);
+      expect(() => mediaService.incrementViewCount(999)).toThrow(
+        "Media file with id 999 not found"
+      );
     });
   });
 
@@ -218,8 +221,15 @@ describe("MediaService", () => {
 
       const result = mediaService.incrementLikeCount(1);
 
-      expect(result.status).toBe(200);
-      expect(result.data.like_count).toBe(4);
+      expect(result.like_count).toBe(4);
+    });
+
+    it("should throw when media not found", () => {
+      mockSqlService.queryOne.mockReturnValue(undefined);
+
+      expect(() => mediaService.incrementLikeCount(999)).toThrow(
+        "Media file with id 999 not found"
+      );
     });
   });
 
@@ -248,8 +258,15 @@ describe("MediaService", () => {
 
       const result = mediaService.setDislike(1);
 
-      expect(result.status).toBe(200);
-      expect(result.data.like_count).toBe(-1);
+      expect(result.like_count).toBe(-1);
+    });
+
+    it("should throw when media not found", () => {
+      mockSqlService.queryOne.mockReturnValue(undefined);
+
+      expect(() => mediaService.setDislike(999)).toThrow(
+        "Media file with id 999 not found"
+      );
     });
   });
 
@@ -274,8 +291,7 @@ describe("MediaService", () => {
 
       const result = mediaService.addTagToMedia(1, "nature");
 
-      expect(result.status).toBe(200);
-      expect(result.data.tag.name).toBe("nature");
+      expect(result.name).toBe("nature");
       expect(mockSqlService.execute).toHaveBeenCalledTimes(2); // INSERT tag, INSERT MediaTags
     });
 
@@ -298,11 +314,11 @@ describe("MediaService", () => {
 
       const result = mediaService.addTagToMedia(1, "nature");
 
-      expect(result.status).toBe(200);
+      expect(result.name).toBe("nature");
       expect(mockSqlService.execute).toHaveBeenCalledTimes(1); // Only INSERT MediaTags
     });
 
-    it("should return 409 if tag already on media", () => {
+    it("should throw if tag already on media", () => {
       const mockTag: Tag = {
         id: 1,
         name: "nature",
@@ -314,17 +330,17 @@ describe("MediaService", () => {
         .mockReturnValueOnce(mockTag) // tag exists
         .mockReturnValueOnce({ media_id: 1, tag_id: 1 }); // relationship exists
 
-      const result = mediaService.addTagToMedia(1, "nature");
-
-      expect(result.status).toBe(409);
+      expect(() => mediaService.addTagToMedia(1, "nature")).toThrow(
+        "Tag already applied to media"
+      );
     });
 
-    it("should return 404 when media not found", () => {
+    it("should throw when media not found", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 
-      const result = mediaService.addTagToMedia(999, "nature");
-
-      expect(result.status).toBe(404);
+      expect(() => mediaService.addTagToMedia(999, "nature")).toThrow(
+        "Media file with id 999 not found"
+      );
     });
   });
 
@@ -335,16 +351,15 @@ describe("MediaService", () => {
 
       const result = mediaService.removeTagFromMedia(1, 1);
 
-      expect(result.status).toBe(200);
-      expect(result.data.success).toBe(true);
+      expect(result.success).toBe(true);
     });
 
-    it("should return 404 when tag not on media", () => {
+    it("should throw when tag not on media", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 
-      const result = mediaService.removeTagFromMedia(1, 1);
-
-      expect(result.status).toBe(404);
+      expect(() => mediaService.removeTagFromMedia(1, 1)).toThrow(
+        "Tag 1 not found on media 1"
+      );
     });
   });
 
@@ -359,8 +374,15 @@ describe("MediaService", () => {
 
       const result = mediaService.getAllTags();
 
-      expect(result.status).toBe(200);
-      expect(result.data).toHaveLength(2);
+      expect(result).toHaveLength(2);
+    });
+
+    it("should throw on database errors", () => {
+      mockSqlService.queryAll.mockImplementation(() => {
+        throw new Error("Database error");
+      });
+
+      expect(() => mediaService.getAllTags()).toThrow("Database error");
     });
   });
 
@@ -383,11 +405,10 @@ describe("MediaService", () => {
 
       const result = mediaService.createTag("nature");
 
-      expect(result.status).toBe(201);
-      expect(result.data?.name).toBe("nature");
+      expect(result.name).toBe("nature");
     });
 
-    it("should return 409 if tag already exists", () => {
+    it("should return existing tag if it already exists", () => {
       const mockTag: Tag = {
         id: 1,
         name: "nature",
@@ -398,8 +419,17 @@ describe("MediaService", () => {
 
       const result = mediaService.createTag("nature");
 
-      expect(result.status).toBe(409);
-      expect(result.data).toBeNull();
+      expect(result.name).toBe("nature");
+      expect(result.id).toBe(1);
+    });
+
+    it("should throw on database errors", () => {
+      mockSqlService.queryOne.mockReturnValue(undefined);
+      mockSqlService.execute.mockImplementation(() => {
+        throw new Error("Database error");
+      });
+
+      expect(() => mediaService.createTag("nature")).toThrow("Database error");
     });
   });
 

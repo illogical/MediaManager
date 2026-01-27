@@ -9,14 +9,13 @@ import type {
   MediaFileWithTags,
   MediaListQuery,
   Tag,
-  ApiResponse,
 } from "../api/schemas";
 
 export class MediaService {
   /**
    * Get media files with optional filtering and sorting, including tags for each media file
    */
-  getMediaFiles(query: MediaListQuery): ApiResponse<MediaFileWithTags[]> {
+  getMediaFiles(query: MediaListQuery): MediaFileWithTags[] {
     logService.trace("MediaService.getMediaFiles() called");
     logService.info(`Query params: ${JSON.stringify(query)}`);
 
@@ -95,23 +94,17 @@ export class MediaService {
 
       logService.info(`Retrieved ${mediaFilesWithTags.length} media files with tags`);
 
-      return {
-        status: 200,
-        data: mediaFilesWithTags,
-      };
+      return mediaFilesWithTags;
     } catch (error) {
       logService.error("Failed to fetch media files", error as Error);
-      return {
-        status: 500,
-        data: [],
-      };
+      throw error;
     }
   }
 
   /**
    * Get a single media file by ID, including tags
    */
-  getMediaFileById(id: number): ApiResponse<MediaFileWithTags | null> {
+  getMediaFileById(id: number): MediaFileWithTags | null {
     logService.trace(`MediaService.getMediaFileById(${id}) called`);
 
     try {
@@ -122,10 +115,7 @@ export class MediaService {
 
       if (!media) {
         logService.warn(`Media file not found: ${id}`);
-        return {
-          status: 404,
-          data: null,
-        };
+        return null;
       }
 
       // Fetch tags for the media file
@@ -138,16 +128,10 @@ export class MediaService {
 
       logService.info(`Retrieved media file: ${media.file_name} with ${tags.length} tags`);
 
-      return {
-        status: 200,
-        data: mediaWithTags,
-      };
+      return mediaWithTags;
     } catch (error) {
       logService.error("Failed to fetch media file", error as Error);
-      return {
-        status: 500,
-        data: null,
-      };
+      throw error;
     }
   }
 
@@ -180,7 +164,7 @@ export class MediaService {
   /**
    * Increment view count for a media file and record in view history
    */
-  incrementViewCount(id: number): ApiResponse<{ view_count: number }> {
+  incrementViewCount(id: number): { view_count: number } {
     logService.trace(`MediaService.incrementViewCount(${id}) called`);
 
     try {
@@ -192,10 +176,7 @@ export class MediaService {
 
       if (!media) {
         logService.warn(`Media file not found for view count increment: ${id}`);
-        return {
-          status: 404,
-          data: { view_count: 0 },
-        };
+        throw new Error(`Media file with id ${id} not found`);
       }
 
       // Increment view count and update last_viewed
@@ -216,23 +197,17 @@ export class MediaService {
       const newViewCount = media.view_count + 1;
       logService.info(`Incremented view count for media: ${media.file_name} to ${newViewCount}`);
 
-      return {
-        status: 200,
-        data: { view_count: newViewCount },
-      };
+      return { view_count: newViewCount };
     } catch (error) {
       logService.error("Failed to increment view count", error as Error);
-      return {
-        status: 500,
-        data: { view_count: 0 },
-      };
+      throw error;
     }
   }
 
   /**
    * Increment like count for a media file
    */
-  incrementLikeCount(id: number): ApiResponse<{ like_count: number }> {
+  incrementLikeCount(id: number): { like_count: number } {
     logService.trace(`MediaService.incrementLikeCount(${id}) called`);
 
     try {
@@ -244,10 +219,7 @@ export class MediaService {
 
       if (!media) {
         logService.warn(`Media file not found for like count increment: ${id}`);
-        return {
-          status: 404,
-          data: { like_count: 0 },
-        };
+        throw new Error(`Media file with id ${id} not found`);
       }
 
       // Always increment like_count
@@ -264,23 +236,17 @@ export class MediaService {
 
       logService.info(`Incremented like count for media: ${media.file_name} to ${newLikeCount}`);
 
-      return {
-        status: 200,
-        data: { like_count: newLikeCount },
-      };
+      return { like_count: newLikeCount };
     } catch (error) {
       logService.error("Failed to increment like count", error as Error);
-      return {
-        status: 500,
-        data: { like_count: 0 },
-      };
+      throw error;
     }
   }
 
   /**
    * Set like count to -1 (dislike) for a media file
    */
-  setDislike(id: number): ApiResponse<{ like_count: number }> {
+  setDislike(id: number): { like_count: number } {
     logService.trace(`MediaService.setDislike(${id}) called`);
 
     try {
@@ -292,10 +258,7 @@ export class MediaService {
 
       if (!media) {
         logService.warn(`Media file not found for dislike: ${id}`);
-        return {
-          status: 404,
-          data: { like_count: 0 },
-        };
+        throw new Error(`Media file with id ${id} not found`);
       }
 
       // Set like_count to -1
@@ -311,23 +274,18 @@ export class MediaService {
 
       logService.info(`Set dislike for media: ${media.file_name}`);
 
-      return {
-        status: 200,
-        data: { like_count: -1 },
-      };
+      return { like_count: -1 };
     } catch (error) {
       logService.error("Failed to set dislike", error as Error);
-      return {
-        status: 500,
-        data: { like_count: 0 },
-      };
+      throw error;
     }
   }
 
   /**
    * Add tag to media file (creates tag if it doesn't exist)
+   * Throws error if media not found or tag already applied
    */
-  addTagToMedia(mediaId: number, tagName: string): ApiResponse<{ tag: Tag }> {
+  addTagToMedia(mediaId: number, tagName: string): Tag {
     logService.trace(`MediaService.addTagToMedia(${mediaId}, "${tagName}") called`);
 
     try {
@@ -339,10 +297,7 @@ export class MediaService {
 
       if (!mediaCheck) {
         logService.warn(`Media file not found for adding tag: ${mediaId}`);
-        return {
-          status: 404,
-          data: { tag: { id: 0, name: "", created_at: "" } },
-        };
+        throw new Error(`Media file with id ${mediaId} not found`);
       }
 
       // Find or create tag
@@ -369,10 +324,7 @@ export class MediaService {
 
       if (existing) {
         logService.warn(`Tag '${tagName}' already applied to media ${mediaId}`);
-        return {
-          status: 409,
-          data: { tag },
-        };
+        throw new Error(`Tag already applied to media`);
       }
 
       // Add tag to media
@@ -383,23 +335,17 @@ export class MediaService {
 
       logService.info(`Added tag '${tagName}' to media ID ${mediaId}`);
 
-      return {
-        status: 200,
-        data: { tag },
-      };
+      return tag;
     } catch (error) {
       logService.error("Failed to add tag to media", error as Error);
-      return {
-        status: 500,
-        data: { tag: { id: 0, name: "", created_at: "" } },
-      };
+      throw error;
     }
   }
 
   /**
    * Remove tag from media file
    */
-  removeTagFromMedia(mediaId: number, tagId: number): ApiResponse<{ success: boolean }> {
+  removeTagFromMedia(mediaId: number, tagId: number): { success: boolean } {
     logService.trace(`MediaService.removeTagFromMedia(${mediaId}, ${tagId}) called`);
 
     try {
@@ -411,10 +357,7 @@ export class MediaService {
 
       if (!existing) {
         logService.warn(`Tag ${tagId} not found on media ${mediaId}`);
-        return {
-          status: 404,
-          data: { success: false },
-        };
+        throw new Error(`Tag ${tagId} not found on media ${mediaId}`);
       }
 
       // Remove tag from media
@@ -425,23 +368,17 @@ export class MediaService {
 
       logService.info(`Removed tag ID ${tagId} from media ID ${mediaId}`);
 
-      return {
-        status: 200,
-        data: { success: true },
-      };
+      return { success: true };
     } catch (error) {
       logService.error("Failed to remove tag from media", error as Error);
-      return {
-        status: 500,
-        data: { success: false },
-      };
+      throw error;
     }
   }
 
   /**
    * Get all tags
    */
-  getAllTags(): ApiResponse<Tag[]> {
+  getAllTags(): Tag[] {
     logService.trace("MediaService.getAllTags() called");
 
     try {
@@ -449,23 +386,19 @@ export class MediaService {
 
       logService.info(`Retrieved ${tags.length} tags`);
 
-      return {
-        status: 200,
-        data: tags,
-      };
+      return tags;
     } catch (error) {
       logService.error("Failed to fetch tags", error as Error);
-      return {
-        status: 500,
-        data: [],
-      };
+      throw error;
     }
   }
 
   /**
-   * Create a new tag
+   * Create a new tag, or return existing tag if it already exists
+   * This is an idempotent operation - calling it multiple times with the same tag name
+   * will return the tag without error (changed from previous 409 conflict response).
    */
-  createTag(name: string): ApiResponse<Tag | null> {
+  createTag(name: string): Tag {
     logService.trace(`MediaService.createTag("${name}") called`);
 
     try {
@@ -474,10 +407,7 @@ export class MediaService {
 
       if (existing) {
         logService.warn(`Tag already exists: ${name}`);
-        return {
-          status: 409,
-          data: null,
-        };
+        return existing;
       }
 
       // Create new tag
@@ -493,16 +423,10 @@ export class MediaService {
         throw new Error("Failed to retrieve created tag");
       }
 
-      return {
-        status: 201,
-        data: newTag,
-      };
+      return newTag;
     } catch (error) {
       logService.error("Failed to create tag", error as Error);
-      return {
-        status: 500,
-        data: null,
-      };
+      throw error;
     }
   }
 }

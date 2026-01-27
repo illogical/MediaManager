@@ -1,5 +1,9 @@
 /**
  * Media API routes
+ * 
+ * Error Handling Note: The route handlers use error message string matching to distinguish
+ * between different error types (404 vs 500). In production, consider migrating to custom
+ * error classes or error codes for more reliable and maintainable error handling.
  */
 
 import { Hono } from "hono";
@@ -16,10 +20,21 @@ const media = new Hono();
 media.get("/", zValidator("query", MediaListQuerySchema), (c) => {
   logService.trace("GET /api/media called");
 
-  const query = c.req.valid("query");
-  const response = mediaService.getMediaFiles(query);
+  try {
+    const query = c.req.valid("query");
+    const mediaFiles = mediaService.getMediaFiles(query);
 
-  return c.json(response, response.status as 200 | 500);
+    return c.json({
+      status: 200,
+      data: mediaFiles,
+    });
+  } catch (error) {
+    logService.error("Failed to fetch media files", error as Error);
+    return c.json({
+      status: 500,
+      data: [],
+    }, 500);
+  }
 });
 
 /**
@@ -39,8 +54,27 @@ media.get("/:id", (c) => {
     );
   }
 
-  const response = mediaService.getMediaFileById(id);
-  return c.json(response, response.status as 200 | 404 | 500);
+  try {
+    const media = mediaService.getMediaFileById(id);
+    
+    if (!media) {
+      return c.json({
+        status: 404,
+        data: null,
+      }, 404);
+    }
+    
+    return c.json({
+      status: 200,
+      data: media,
+    });
+  } catch (error) {
+    logService.error("Failed to fetch media file", error as Error);
+    return c.json({
+      status: 500,
+      data: null,
+    }, 500);
+  }
 });
 
 /**
@@ -60,8 +94,29 @@ media.post("/:id/view", (c) => {
     );
   }
 
-  const response = mediaService.incrementViewCount(id);
-  return c.json(response, response.status as 200 | 404 | 500);
+  try {
+    const result = mediaService.incrementViewCount(id);
+    return c.json({
+      status: 200,
+      data: result,
+    });
+  } catch (error) {
+    const err = error as Error;
+    logService.error("Failed to increment view count", err);
+    
+    // Check if it's a "not found" error (404) vs database error (500)
+    if (err.message.includes("not found")) {
+      return c.json({
+        status: 404,
+        data: { view_count: 0 },
+      }, 404);
+    }
+    
+    return c.json({
+      status: 500,
+      data: { view_count: 0 },
+    }, 500);
+  }
 });
 
 /**
@@ -81,8 +136,29 @@ media.post("/:id/like", (c) => {
     );
   }
 
-  const response = mediaService.incrementLikeCount(id);
-  return c.json(response, response.status as 200 | 404 | 500);
+  try {
+    const result = mediaService.incrementLikeCount(id);
+    return c.json({
+      status: 200,
+      data: result,
+    });
+  } catch (error) {
+    const err = error as Error;
+    logService.error("Failed to increment like count", err);
+    
+    // Check if it's a "not found" error (404) vs database error (500)
+    if (err.message.includes("not found")) {
+      return c.json({
+        status: 404,
+        data: { like_count: 0 },
+      }, 404);
+    }
+    
+    return c.json({
+      status: 500,
+      data: { like_count: 0 },
+    }, 500);
+  }
 });
 
 /**
@@ -102,8 +178,29 @@ media.post("/:id/dislike", (c) => {
     );
   }
 
-  const response = mediaService.setDislike(id);
-  return c.json(response, response.status as 200 | 404 | 500);
+  try {
+    const result = mediaService.setDislike(id);
+    return c.json({
+      status: 200,
+      data: result,
+    });
+  } catch (error) {
+    const err = error as Error;
+    logService.error("Failed to set dislike", err);
+    
+    // Check if it's a "not found" error (404) vs database error (500)
+    if (err.message.includes("not found")) {
+      return c.json({
+        status: 404,
+        data: { like_count: 0 },
+      }, 404);
+    }
+    
+    return c.json({
+      status: 500,
+      data: { like_count: 0 },
+    }, 500);
+  }
 });
 
 /**
@@ -148,10 +245,36 @@ media.post("/:id/tags", zValidator("json", AddTagToMediaSchema), (c) => {
     );
   }
 
-  const body = c.req.valid("json");
-  const response = mediaService.addTagToMedia(mediaId, body.tagName);
+  try {
+    const body = c.req.valid("json");
+    const tag = mediaService.addTagToMedia(mediaId, body.tagName);
 
-  return c.json(response, response.status as 200 | 404 | 409 | 500);
+    return c.json({
+      status: 200,
+      data: { tag },
+    });
+  } catch (error) {
+    const err = error as Error;
+    logService.error("Failed to add tag to media", err);
+    
+    // Check if it's a "not found" error (404) vs "already applied" error (409)
+    if (err.message.includes("not found")) {
+      return c.json({
+        status: 404,
+        data: null,
+      }, 404);
+    } else if (err.message.includes("already applied")) {
+      return c.json({
+        status: 409,
+        data: null,
+      }, 409);
+    }
+    
+    return c.json({
+      status: 500,
+      data: null,
+    }, 500);
+  }
 });
 
 /**
@@ -172,8 +295,29 @@ media.delete("/:id/tags/:tagId", (c) => {
     );
   }
 
-  const response = mediaService.removeTagFromMedia(mediaId, tagId);
-  return c.json(response, response.status as 200 | 404 | 500);
+  try {
+    const result = mediaService.removeTagFromMedia(mediaId, tagId);
+    return c.json({
+      status: 200,
+      data: result,
+    });
+  } catch (error) {
+    const err = error as Error;
+    logService.error("Failed to remove tag from media", err);
+    
+    // Check if it's a "not found" error (404) vs database error (500)
+    if (err.message.includes("not found")) {
+      return c.json({
+        status: 404,
+        data: { success: false },
+      }, 404);
+    }
+    
+    return c.json({
+      status: 500,
+      data: { success: false },
+    }, 500);
+  }
 });
 
 export default media;

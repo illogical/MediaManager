@@ -4,13 +4,13 @@
 
 import { sqlService } from "./sqlService";
 import { logService } from "./logService";
-import type { ViewHistory, ApiResponse } from "../api/schemas";
+import type { ViewHistory } from "../api/schemas";
 
 export class HistoryService {
   /**
-   * Get last 20 viewed items
+   * Get last N viewed items
    */
-  getViewHistory(limit: number = 20): ApiResponse<ViewHistory[]> {
+  getViewHistory(limit: number = 20): ViewHistory[] {
     logService.trace(`HistoryService.getViewHistory(${limit}) called`);
 
     try {
@@ -33,16 +33,10 @@ export class HistoryService {
 
       logService.info(`Retrieved ${results.length} history entries`);
 
-      return {
-        status: 200,
-        data: results,
-      };
+      return results;
     } catch (error) {
       logService.error("Failed to fetch view history", error as Error);
-      return {
-        status: 500,
-        data: [],
-      };
+      throw error;
     }
   }
 }
