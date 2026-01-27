@@ -104,10 +104,9 @@ export class FileSystemService {
    * Check if file already exists in database
    */
   private fileExists(filePath: string): boolean {
-    const existing = this.sqlService.queryOne<{ id: number }>(
-      "SELECT id FROM MediaFiles WHERE file_path = ?",
-      [filePath]
-    );
+    const existing = this.sqlService.queryOne<{ id: number }>("SELECT id FROM MediaFiles WHERE file_path = ?", [
+      filePath,
+    ]);
     return existing !== undefined;
   }
 
@@ -154,14 +153,16 @@ export class FileSystemService {
   /**
    * Insert files into database in batches
    */
-  private insertFilesBatch(files: Array<{
-    folder_path: string;
-    file_name: string;
-    file_path: string;
-    file_size: number | null;
-    mime_type: string;
-    created_date: string | null;
-  }>): number {
+  private insertFilesBatch(
+    files: Array<{
+      folder_path: string;
+      file_name: string;
+      file_path: string;
+      file_size: number | null;
+      mime_type: string;
+      created_date: string | null;
+    }>
+  ): number {
     if (files.length === 0) {
       return 0;
     }
@@ -171,7 +172,7 @@ export class FileSystemService {
     // Process files in batches
     for (let i = 0; i < files.length; i += this.batchSize) {
       const batch = files.slice(i, Math.min(i + this.batchSize, files.length));
-      
+
       try {
         // Use transaction for batch insert
         const db = this.sqlService.getDb();

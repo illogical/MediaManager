@@ -159,10 +159,9 @@ describe("FileSystemService", () => {
     fileSystemService.scan(testDir);
 
     // Verify file_path is absolute
-    const file = sqlService.queryOne<{ file_path: string }>(
-      "SELECT file_path FROM MediaFiles WHERE file_name = ?",
-      ["image.jpg"]
-    );
+    const file = sqlService.queryOne<{ file_path: string }>("SELECT file_path FROM MediaFiles WHERE file_name = ?", [
+      "image.jpg",
+    ]);
     expect(file?.file_path).toBe(path.join(testDir, "image.jpg"));
     expect(path.isAbsolute(file?.file_path || "")).toBe(true);
   });
