@@ -3,9 +3,9 @@
  */
 
 import { Hono } from "hono";
-import { sqlService } from "../../services/sqlService";
+import { historyService } from "../../services/historyService";
 import { logService } from "../../services/logService";
-import { type ViewHistory, type ApiResponse } from "../schemas";
+import type { ApiResponse, ViewHistory } from "../schemas";
 
 const history = new Hono();
 
@@ -16,30 +16,12 @@ history.get("/", (c) => {
   logService.trace("GET /api/history called");
 
   try {
-    const results = sqlService.queryAll<ViewHistory>(
-      `
-      SELECT 
-        vh.id, 
-        vh.media_id, 
-        vh.viewed_at,
-        m.file_name,
-        m.file_path
-      FROM ViewHistory vh
-      JOIN MediaFiles m ON vh.media_id = m.id
-      WHERE m.is_deleted = 0
-      ORDER BY vh.viewed_at DESC
-      LIMIT 20
-    `
-    );
-
-    logService.info(`Retrieved ${results.length} history entries`);
-
+    const data = historyService.getViewHistory();
     const response: ApiResponse<ViewHistory[]> = {
       status: 200,
-      data: results,
+      data,
     };
-
-    return c.json(response);
+    return c.json(response, 200);
   } catch (error) {
     logService.error("Failed to fetch view history", error as Error);
     const response: ApiResponse<{ error: string }> = {

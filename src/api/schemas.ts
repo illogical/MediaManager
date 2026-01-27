@@ -103,6 +103,11 @@ export const ReorderPlaylistSchema = z.object({
   mediaIds: z.array(z.number()),
 });
 
+// MediaFile with tags
+export const MediaFileWithTagsSchema = MediaFileSchema.extend({
+  tags: z.array(TagSchema).optional(),
+});
+
 // Response wrapper
 export const ApiResponseSchema = z.object({
   status: z.number(),
@@ -111,6 +116,7 @@ export const ApiResponseSchema = z.object({
 
 // Type exports
 export type MediaFile = z.infer<typeof MediaFileSchema>;
+export type MediaFileWithTags = z.infer<typeof MediaFileWithTagsSchema>;
 export type MediaListQuery = z.infer<typeof MediaListQuerySchema>;
 export type Tag = z.infer<typeof TagSchema>;
 export type CreateTag = z.infer<typeof CreateTagSchema>;
