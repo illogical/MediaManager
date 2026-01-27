@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { FileSystemService } from "../services/fileSystemService";
+import { FileSystemService, FolderAlreadyExistsError } from "../services/fileSystemService";
 import { SqlService } from "../services/sqlService";
 
 describe("FileSystemService", () => {
@@ -23,6 +23,9 @@ describe("FileSystemService", () => {
 
     // Create MediaFiles table using centralized method
     sqlService.createMediaFilesTable();
+
+    // Create Folders table for tests
+    sqlService.createFoldersTable();
 
     // Create test directory with files
     testDir = path.join(os.tmpdir(), `test-files-${Date.now()}`);
@@ -166,5 +169,45 @@ describe("FileSystemService", () => {
     expect(file?.file_size).toBe(testContent.length);
     expect(file?.mime_type).toBe("image/jpeg");
     expect(file?.created_date).toBeDefined();
+  });
+
+  it("should create a folder in the database", () => {
+    const folderName = "Test Folder";
+    const folderPath = "/path/to/folder";
+
+    const folderId = fileSystemService.createFolder(folderName, folderPath);
+
+    expect(folderId).toBeDefined();
+    expect(typeof folderId).toBe("number");
+
+    // Verify folder is in database
+    const folder = sqlService.queryOne<{
+      id: number;
+      name: string;
+      path: string;
+      default_sort: string;
+      default_filter_type: string;
+      is_active: number;
+    }>("SELECT id, name, path, default_sort, default_filter_type, is_active FROM Folders WHERE id = ?", [folderId]);
+
+    expect(folder).toBeDefined();
+    expect(folder?.name).toBe(folderName);
+    expect(folder?.path).toBe(folderPath);
+    expect(folder?.default_sort).toBe("created_date_desc");
+    expect(folder?.default_filter_type).toBe("both");
+    expect(folder?.is_active).toBe(1);
+  });
+
+  it("should fail when creating folder with duplicate path", () => {
+    const folderName = "Test Folder";
+    const folderPath = "/path/to/folder";
+
+    // Create first folder
+    fileSystemService.createFolder(folderName, folderPath);
+
+    // Try to create folder with same path
+    expect(() => {
+      fileSystemService.createFolder("Another Folder", folderPath);
+    }).toThrow(FolderAlreadyExistsError);
   });
 });

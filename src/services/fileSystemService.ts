@@ -17,6 +17,13 @@ export interface ScanOptions {
   recursive?: boolean;
 }
 
+export class FolderAlreadyExistsError extends Error {
+  constructor(folderPath: string) {
+    super(`Folder already exists for path: ${folderPath}`);
+    this.name = "FolderAlreadyExistsError";
+  }
+}
+
 export class FileSystemService {
   // Supported file extensions
   private readonly supportedExtensions = [
@@ -213,6 +220,44 @@ export class FileSystemService {
     }
 
     return insertedCount;
+  }
+
+  /**
+   * Create a folder in the database
+   * @param name - Folder name
+   * @param folderPath - Absolute path to the folder
+   * @returns Folder ID
+   */
+  createFolder(name: string, folderPath: string): number {
+    logService.info(`Creating folder: ${name} at path: ${folderPath}`);
+
+    try {
+      const result = this.sqlService.execute(
+        `INSERT INTO Folders (name, path, last_selected, default_sort, default_filter_type, is_active, created_at)
+         VALUES (?, ?, NULL, 'created_date_desc', 'both', 1, datetime('now'))`,
+        [name, folderPath]
+      );
+
+      const folderId = Number(result.lastInsertRowid);
+      logService.info(`Folder created with ID: ${folderId}`);
+      return folderId;
+    } catch (error) {
+      const err = error as Error & { code?: string; message?: string };
+
+      // Map unique constraint violations to a specific error type
+      const isUniqueConstraint =
+        err.code === "SQLITE_CONSTRAINT" ||
+        err.code === "SQLITE_CONSTRAINT_UNIQUE" ||
+        (err.message && err.message.includes("UNIQUE constraint failed: Folders.path"));
+
+      if (isUniqueConstraint) {
+        logService.warn(`Folder path already exists in database: ${folderPath}`);
+        throw new FolderAlreadyExistsError(folderPath);
+      }
+
+      logService.error(`Failed to create folder: ${name}`, err);
+      throw err;
+    }
   }
 
   /**

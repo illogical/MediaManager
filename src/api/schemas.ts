@@ -71,6 +71,12 @@ export const FolderSchema = z.object({
   created_at: z.string(),
 });
 
+export const CreateFolderSchema = z.object({
+  name: z.string().min(1).max(255),
+  path: z.string().min(1),
+  recursive: z.boolean().optional().default(false),
+});
+
 // ViewHistory schemas
 export const ViewHistorySchema = z.object({
   id: z.number(),
@@ -127,6 +133,7 @@ export type Playlist = z.infer<typeof PlaylistSchema>;
 export type CreatePlaylist = z.infer<typeof CreatePlaylistSchema>;
 export type UpdatePlaylist = z.infer<typeof UpdatePlaylistSchema>;
 export type ReorderPlaylist = z.infer<typeof ReorderPlaylistSchema>;
+export type CreateFolder = z.infer<typeof CreateFolderSchema>;
 export type ApiResponse<T = unknown> = {
   status: number;
   data: T;
