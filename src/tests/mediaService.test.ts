@@ -62,13 +62,9 @@ describe("MediaService", () => {
         },
       ];
 
-      const mockTags: Tag[] = [
-        { id: 1, name: "nature", created_at: "2024-01-01T00:00:00Z" },
-      ];
+      const mockTags: Tag[] = [{ id: 1, name: "nature", created_at: "2024-01-01T00:00:00Z" }];
 
-      mockSqlService.queryAll
-        .mockReturnValueOnce(mockMediaFiles)
-        .mockReturnValueOnce(mockTags);
+      mockSqlService.queryAll.mockReturnValueOnce(mockMediaFiles).mockReturnValueOnce(mockTags);
 
       const result = mediaService.getMediaFiles({
         sort: "created_date_desc",
@@ -127,9 +123,7 @@ describe("MediaService", () => {
         updated_at: "2024-01-01T00:00:00Z",
       };
 
-      const mockTags: Tag[] = [
-        { id: 1, name: "nature", created_at: "2024-01-01T00:00:00Z" },
-      ];
+      const mockTags: Tag[] = [{ id: 1, name: "nature", created_at: "2024-01-01T00:00:00Z" }];
 
       mockSqlService.queryOne.mockReturnValue(mockMedia);
       mockSqlService.queryAll.mockReturnValue(mockTags);
@@ -190,9 +184,7 @@ describe("MediaService", () => {
     it("should throw when media not found", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 
-      expect(() => mediaService.incrementViewCount(999)).toThrow(
-        "Media file with id 999 not found"
-      );
+      expect(() => mediaService.incrementViewCount(999)).toThrow("Media file with id 999 not found");
     });
   });
 
@@ -227,9 +219,7 @@ describe("MediaService", () => {
     it("should throw when media not found", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 
-      expect(() => mediaService.incrementLikeCount(999)).toThrow(
-        "Media file with id 999 not found"
-      );
+      expect(() => mediaService.incrementLikeCount(999)).toThrow("Media file with id 999 not found");
     });
   });
 
@@ -264,9 +254,7 @@ describe("MediaService", () => {
     it("should throw when media not found", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 
-      expect(() => mediaService.setDislike(999)).toThrow(
-        "Media file with id 999 not found"
-      );
+      expect(() => mediaService.setDislike(999)).toThrow("Media file with id 999 not found");
     });
   });
 
@@ -330,17 +318,13 @@ describe("MediaService", () => {
         .mockReturnValueOnce(mockTag) // tag exists
         .mockReturnValueOnce({ media_id: 1, tag_id: 1 }); // relationship exists
 
-      expect(() => mediaService.addTagToMedia(1, "nature")).toThrow(
-        "Tag already applied to media"
-      );
+      expect(() => mediaService.addTagToMedia(1, "nature")).toThrow("Tag already applied to media");
     });
 
     it("should throw when media not found", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 
-      expect(() => mediaService.addTagToMedia(999, "nature")).toThrow(
-        "Media file with id 999 not found"
-      );
+      expect(() => mediaService.addTagToMedia(999, "nature")).toThrow("Media file with id 999 not found");
     });
   });
 
@@ -357,9 +341,7 @@ describe("MediaService", () => {
     it("should throw when tag not on media", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 
-      expect(() => mediaService.removeTagFromMedia(1, 1)).toThrow(
-        "Tag 1 not found on media 1"
-      );
+      expect(() => mediaService.removeTagFromMedia(1, 1)).toThrow("Tag 1 not found on media 1");
     });
   });
 
@@ -435,9 +417,7 @@ describe("MediaService", () => {
 
   describe("getTagsForMedia", () => {
     it("should return tags for a media file", () => {
-      const mockTags: Tag[] = [
-        { id: 1, name: "nature", created_at: "2024-01-01T00:00:00Z" },
-      ];
+      const mockTags: Tag[] = [{ id: 1, name: "nature", created_at: "2024-01-01T00:00:00Z" }];
 
       mockSqlService.queryAll.mockReturnValue(mockTags);
 
