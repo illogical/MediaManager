@@ -51,28 +51,19 @@
 - [x] Refactor application logic to a service layer
     - [x] Move the /api/media and /api/tags and /api/history endpoints' database logic to new mediaService class
     - [x] Refactor the media, tags, and history API routes to leverage the new mediaService.
-    - [ ] Move the /api/playlist endpoints' database logic to new playlistService class.
-    - [ ] Refactor the playlist route to leverage the new playlistService.
+    - [x] Move the /api/playlist endpoints' database logic to new playlistService class.
+    - [x] Refactor the playlist route to leverage the new playlistService.
 - [x] Create an new fileSystemService.ts class
     - [x] Add a scan(folderPath: string, extensions: string[]) function and output a MediaFileSchema array
         - [x] Index files containing the provided file extensions found in the provided folderPath
     - [x] Add a createFolder(folderPath: string) function to store the folder path in the Folders SQL table and index file paths to the MediaFiles table
-- [ ] Create a new playlistService.ts class
-    - [ ] Move all SQL statements from playlists.ts route to playlistService methods
-    - [ ] Implement playlist CRUD methods (create, read, update, delete)
-    - [ ] Implement playlist media management (addMedia, removeMedia, reorderMedia)
-    - [ ] Add comprehensive logging and error handling
-- [ ] Refactor playlists route to use playlistService
-    - [ ] Update route handlers to call playlistService methods instead of direct SQL queries
-- [ ] Document localStorage schema in SPECIFICATION.md
-    - [ ] Current session state structure
-    - [ ] Last viewed media reference
-    - [ ] UI preferences (overlay visible, grid density)
-- [ ] Add UX workflow documentation to DESIGN.md
-    - [ ] Onboarding flow for first-time user
-    - [ ] Empty state designs (no folders, no media, all filtered)
-    - [ ] Error state handling and user feedback
-    - [ ] Loading states for each view
+- [x] Create a new playlistService.ts class
+    - [x] Move all SQL statements from playlists.ts route to playlistService methods
+    - [x] Implement playlist CRUD methods (create, read, update, delete)
+    - [x] Implement playlist media management (addMedia, removeMedia, reorderMedia)
+    - [x] Add comprehensive logging and error handling
+- [x] Refactor playlists route to use playlistService
+    - [x] Update route handlers to call playlistService methods instead of direct SQL queries
 - [ ] Define keyboard shortcuts in DESIGN.md
     - [ ] Arrow Left/Right: Previous/Next media
     - [ ] Space: Toggle UI overlay
@@ -84,8 +75,8 @@
     - [ ] Plus/Minus: Zoom in/out
     - [ ] 0: Reset zoom to fit
 - [ ] Document like/dislike button behavior in SPECIFICATION.md
-    - [ ] Like button: Increments like_count (0→1→2→3...)
-    - [ ] Dislike button: Sets like_count to -1 regardless of current value
+    - [x] Like button: Increments like_count (0→1→2→3...)
+    - [x] Dislike button: Sets like_count to -1 regardless of current value
     - [ ] Visual feedback: Show current like_count on button
     - [ ] Keyboard shortcuts for quick marking
 - [ ] Plan video player requirements (placeholder for Phase 6)
@@ -100,6 +91,10 @@
     - [ ] Document caching strategy (filesystem cache vs database blob)
     - [ ] Consider lazy generation vs pre-generation on scan
     - [ ] Plan cache invalidation and size limits
+- [ ] Document localStorage schema in SPECIFICATION.md
+    - [ ] Current session state structure
+    - [ ] Last viewed media reference
+    - [ ] UI preferences (overlay visible, grid density)
 - [ ] Add Future Considerations section to SPECIFICATION.md
     - [ ] Performance: Virtual scrolling for 1000+ item grids
     - [ ] Performance: Database query optimization strategies
@@ -108,13 +103,6 @@
     - [ ] VR Support: Low priority, rely on standard virtual browser interactions
     - [ ] Multi-device sync considerations
     - [ ] Advanced features: Smart collections, batch operations, search
-- [ ] Add accessibility requirements to DESIGN.md
-    - [ ] ARIA labels and roles for all interactive elements
-    - [ ] Keyboard focus management and visible focus indicators
-    - [ ] Screen reader announcements for view changes
-    - [ ] Alt text strategy (use filename or tags)
-    - [ ] Support for prefers-reduced-motion
-    - [ ] High contrast mode support
 
 ## Phase 1: UI Foundations & Core Viewer (Images Only)
 - [ ] Initialize Vite project with TypeScript
@@ -330,7 +318,7 @@
     - [ ] Fallback to mock data if API unavailable
 
 ## Phase 5: Randomization & Playlists
-- [ ] Implement Randomization service (`server/services/randomizer.ts`)
+- [ ] Implement Randomization service (`server/services/randomizerService.ts`)
     - [ ] Random algorithm (shuffle with Fisher-Yates)
     - [ ] Prioritize unviewed (view_count = 0 first)
     - [ ] Prioritize least-viewed (sort by view_count asc, then shuffle)
@@ -344,7 +332,6 @@
     - [ ] Track current_index in session
     - [ ] API to resume session by ID
     - [ ] Handle deleted/moved files (skip and continue)
-    - [ ] Session expiration and cleanup (delete after 7 days)
 - [ ] Implement Randomization endpoints (`server/routes/randomize.ts`)
     - [ ] POST /api/randomize - Create new session
     - [ ] GET /api/randomize/:sessionId - Resume session
