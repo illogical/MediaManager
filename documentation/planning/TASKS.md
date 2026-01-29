@@ -318,14 +318,14 @@
     - [ ] Fallback to mock data if API unavailable
 
 ## Phase 5: Randomization & Playlists
-- [ ] Implement Randomization service (`server/services/randomizerService.ts`)
-    - [ ] Random algorithm (shuffle with Fisher-Yates)
-    - [ ] Prioritize unviewed (view_count = 0 first)
-    - [ ] Prioritize least-viewed (sort by view_count asc, then shuffle)
-    - [ ] Prioritize most-liked (sort by like_count desc, then shuffle)
-    - [ ] Prioritize most-viewed (sort by view_count desc, then shuffle)
-    - [ ] Always exclude disliked (like_count < 0)
-    - [ ] Apply current filters to randomization pool
+- [x] Implement Randomization service (`server/services/randomizerService.ts`)
+    - [x] Random algorithm (shuffle with Fisher-Yates)
+    - [x] Prioritize unviewed (view_count = 0 first)
+    - [x] Prioritize least-viewed (sort by view_count asc, then shuffle)
+    - [x] Prioritize most-liked (sort by like_count desc, then shuffle)
+    - [x] Prioritize most-viewed (sort by view_count desc, then shuffle)
+    - [x] Always exclude disliked (like_count < 0)
+    - [x] Apply current filters to randomization pool
 - [ ] Implement randomization session management
     - [ ] Create session with UUID
     - [ ] Store media_order as JSON array in RandomizationSessions

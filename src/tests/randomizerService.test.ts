@@ -109,7 +109,7 @@ describe("RandomizerService", () => {
   });
 
   describe("random algorithm", () => {
-    it("should shuffle media files randomly", () => {
+    it("should preserve all media items", () => {
       const mediaFiles = Array.from({ length: 10 }, (_, i) =>
         createMockMedia({ id: i + 1 })
       );
@@ -118,11 +118,11 @@ describe("RandomizerService", () => {
       const ids = result.map((r) => r.id);
 
       expect(ids).toHaveLength(10);
-      expect(ids.sort()).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      expect(ids.sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
     it("should produce different orders on multiple calls", () => {
-      const mediaFiles = Array.from({ length: 20 }, (_, i) =>
+      const mediaFiles = Array.from({ length: 40 }, (_, i) =>
         createMockMedia({ id: i + 1 })
       );
 
@@ -132,7 +132,7 @@ describe("RandomizerService", () => {
       const ids1 = result1.map((r) => r.id);
       const ids2 = result2.map((r) => r.id);
 
-      // Expect different order (highly unlikely to be the same with 20 items)
+      // Expect different order (highly unlikely to be the same with 40 items)
       expect(ids1).not.toEqual(ids2);
     });
 
