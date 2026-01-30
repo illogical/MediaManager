@@ -216,6 +216,33 @@ describe("MediaService", () => {
       expect(result.like_count).toBe(4);
     });
 
+    it("should increment like count from dislike to 1", () => {
+      const mockMedia: MediaFile = {
+        id: 1,
+        folder_path: "/test",
+        file_name: "test.jpg",
+        file_path: "/test/test.jpg",
+        file_size: 1024,
+        mime_type: "image/jpeg",
+        width: 800,
+        height: 600,
+        created_date: "2024-01-01",
+        view_count: 5,
+        last_viewed: null,
+        like_count: -1,
+        is_deleted: 0,
+        created_at: "2024-01-01T00:00:00Z",
+        updated_at: "2024-01-01T00:00:00Z",
+      };
+
+      mockSqlService.queryOne.mockReturnValue(mockMedia);
+      mockSqlService.execute.mockReturnValue({ changes: 1, lastInsertRowid: 1 });
+
+      const result = mediaService.incrementLikeCount(1);
+
+      expect(result.like_count).toBe(1);
+    });
+
     it("should throw when media not found", () => {
       mockSqlService.queryOne.mockReturnValue(undefined);
 

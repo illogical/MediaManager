@@ -209,7 +209,7 @@ export class MediaService {
       }
 
       // Always increment like_count
-      const newLikeCount = media.like_count + 1;
+      const newLikeCount = media.like_count < 1 ? 1 : media.like_count + 1;
       sqlService.execute(
         `
         UPDATE MediaFiles 

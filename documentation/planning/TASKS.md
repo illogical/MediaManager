@@ -95,14 +95,6 @@
     - [ ] Current session state structure
     - [ ] Last viewed media reference
     - [ ] UI preferences (overlay visible, grid density)
-- [ ] Add Future Considerations section to SPECIFICATION.md
-    - [ ] Performance: Virtual scrolling for 1000+ item grids
-    - [ ] Performance: Database query optimization strategies
-    - [ ] Performance: Thumbnail lazy loading and preloading strategies
-    - [ ] Performance: Consider pagination limits for very large folders
-    - [ ] VR Support: Low priority, rely on standard virtual browser interactions
-    - [ ] Multi-device sync considerations
-    - [ ] Advanced features: Smart collections, batch operations, search
 
 ## Phase 1: UI Foundations & Core Viewer (Images Only)
 - [ ] Initialize Vite project with TypeScript
@@ -519,3 +511,11 @@
     - [ ] Environment variables
     - [ ] Database backup procedures
     - [ ] Update procedures
+- [ ] Add Future Considerations section to SPECIFICATION.md
+    - [ ] Performance: Virtual scrolling for 1000+ item grids
+    - [ ] Performance: Database query optimization strategies
+    - [ ] Performance: Thumbnail lazy loading and preloading strategies
+    - [ ] Performance: Consider pagination limits for very large folders
+    - [ ] VR Support: Low priority, rely on standard virtual browser interactions
+    - [ ] Multi-device sync considerations
+    - [ ] Advanced features: Smart collections, batch operations, search
