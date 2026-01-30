@@ -7,10 +7,14 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import { SqlService } from "../services/sqlService";
+import { FileSystemService } from "../services/fileSystemService";
+import { IndexFolderService } from "../services/indexFolderService";
 
 // We'll test the core functionality by importing and using the same logic
 describe("indexFolders script", () => {
   let sqlService: SqlService;
+  let fileSystemService: FileSystemService;
+  let indexFolderService: IndexFolderService;
   let testDbPath: string;
   let testDir: string;
   let configPath: string;
@@ -23,6 +27,10 @@ describe("indexFolders script", () => {
 
     // Create all tables
     sqlService.createAllTables();
+
+    // Initialize services
+    fileSystemService = new FileSystemService(sqlService);
+    indexFolderService = new IndexFolderService(sqlService, fileSystemService);
 
     // Create test directory
     testDir = path.join(os.tmpdir(), `test-index-folders-${Date.now()}`);
@@ -218,5 +226,80 @@ describe("indexFolders script", () => {
     const configPath = configPathArg ? configPathArg.split("=")[1] : "default";
 
     expect(configPath).toBe(customPath);
+  });
+
+  it("should index a new folder using IndexFolderService", async () => {
+    // Create test files
+    const file1 = path.join(testDir, "photo1.jpg");
+    const file2 = path.join(testDir, "photo2.png");
+    fs.writeFileSync(file1, "test");
+    fs.writeFileSync(file2, "test");
+
+    // Index the folder
+    await indexFolderService.indexFolder({
+      name: "Test Folder",
+      path: testDir,
+      recursive: false,
+    });
+
+    // Verify folder was created
+    const folder = sqlService.queryOne<{ id: number; name: string }>("SELECT id, name FROM Folders WHERE path = ?", [
+      testDir,
+    ]);
+    expect(folder).toBeDefined();
+    expect(folder?.name).toBe("Test Folder");
+
+    // Verify files were added
+    const files = sqlService.queryAll<{ file_name: string }>("SELECT file_name FROM MediaFiles WHERE folder_path = ?", [
+      testDir,
+    ]);
+    expect(files).toHaveLength(2);
+  });
+
+  it("should handle re-indexing existing folder with changes", async () => {
+    // Create initial files
+    const file1 = path.join(testDir, "photo1.jpg");
+    const file2 = path.join(testDir, "photo2.jpg");
+    fs.writeFileSync(file1, "test");
+    fs.writeFileSync(file2, "test");
+
+    // First index
+    await indexFolderService.indexFolder({
+      name: "Test Folder",
+      path: testDir,
+      recursive: false,
+    });
+
+    // Delete one file and add a new one
+    fs.unlinkSync(file2);
+    const file3 = path.join(testDir, "photo3.jpg");
+    fs.writeFileSync(file3, "test");
+
+    // Re-index
+    await indexFolderService.indexFolder({
+      name: "Test Folder",
+      path: testDir,
+      recursive: false,
+    });
+
+    // Verify: photo2 should be marked as deleted
+    const deletedFile = sqlService.queryOne<{ is_deleted: number }>(
+      "SELECT is_deleted FROM MediaFiles WHERE file_path = ?",
+      [file2]
+    );
+    expect(deletedFile?.is_deleted).toBe(1);
+
+    // Verify: photo3 should be added
+    const newFile = sqlService.queryOne<{ file_name: string }>("SELECT file_name FROM MediaFiles WHERE file_path = ?", [
+      file3,
+    ]);
+    expect(newFile?.file_name).toBe("photo3.jpg");
+
+    // Verify: photo1 should still be active
+    const activeFile = sqlService.queryOne<{ is_deleted: number }>(
+      "SELECT is_deleted FROM MediaFiles WHERE file_path = ?",
+      [file1]
+    );
+    expect(activeFile?.is_deleted).toBe(0);
   });
 });
