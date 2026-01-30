@@ -12,7 +12,8 @@
     "db:create": "tsx scripts/createDatabase.ts",
     "db:seed": "tsx scripts/seedDatabase.ts",
     "db:setup": "npm run db:create && npm run db:seed",
-    "server": "tsx --watch src/api/server.ts"
+    "server": "tsx --watch src/api/server.ts",
+    "index:folders": "tsx scripts/indexFolders.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",

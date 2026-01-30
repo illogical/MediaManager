@@ -1,0 +1,9 @@
+{
+  "folders": [
+    {
+      "name": "Sample Media",
+      "path": "/path/to/media/folder",
+      "recursive": true
+    }
+  ]
+}
