@@ -15,11 +15,166 @@ export interface FolderConfig {
   recursive?: boolean;
 }
 
+export interface FileAnalysis {
+  filePath: string;
+  fileName: string;
+  folderPath: string;
+  fileSize: number;
+  mimeType: string;
+  extension: string;
+  category: 'image' | 'video';
+  createdDate: string | null;
+}
+
+export interface TimingBreakdown {
+  filesystemScanMs: number;
+  databaseQueryMs: number;
+  deletionMarkingMs?: number;
+  totalMs: number;
+}
+
+export interface FolderAnalysisResult {
+  folderName: string;
+  folderPath: string;
+  recursive: boolean;
+  totalFilesOnDisk: number;
+  filesAlreadyInDb: number;
+  filesToAdd: FileAnalysis[];
+  filesToDelete: string[];
+  filesByCategory: {
+    image: number;
+    video: number;
+  };
+  filesByExtension: Record<string, number>;
+  timing: TimingBreakdown;
+}
+
+export interface AnalysisReport {
+  timestamp: string;
+  totalFolders: number;
+  totalFilesOnDisk: number;
+  totalFilesToAdd: number;
+  totalFilesToSkip: number;
+  totalFilesToDelete: number;
+  folders: FolderAnalysisResult[];
+  overallTiming: {
+    totalMs: number;
+    averageMsPerFolder: number;
+  };
+}
+
 export class IndexFolderService {
+  // Supported file extensions
+  private readonly supportedExtensions = [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".bmp",
+    ".webp",
+    ".mp4",
+    ".webm",
+    ".mov",
+    ".avi",
+    ".mkv",
+  ];
+
+  private readonly imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
+  private readonly videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"];
+
   constructor(
     private sqlService: SqlService,
     private fileSystemService: FileSystemService
   ) {}
+
+  /**
+   * Check if file extension is supported
+   */
+  private isSupportedExtension(filePath: string): boolean {
+    const ext = path.extname(filePath).toLowerCase();
+    return this.supportedExtensions.includes(ext);
+  }
+
+  /**
+   * Get file category based on extension
+   */
+  private getFileCategory(filePath: string): 'image' | 'video' {
+    const ext = path.extname(filePath).toLowerCase();
+    if (this.imageExtensions.includes(ext)) {
+      return 'image';
+    }
+    return 'video';
+  }
+
+  /**
+   * Get MIME type based on file extension
+   */
+  private getMimeType(filePath: string): string {
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".png": "image/png",
+      ".gif": "image/gif",
+      ".bmp": "image/bmp",
+      ".webp": "image/webp",
+      ".mp4": "video/mp4",
+      ".webm": "video/webm",
+      ".mov": "video/quicktime",
+      ".avi": "video/x-msvideo",
+      ".mkv": "video/x-matroska",
+    };
+    return mimeTypes[ext] || "application/octet-stream";
+  }
+
+  /**
+   * Recursively scan directory for supported media files
+   */
+  private scanDirectory(dirPath: string, recursive: boolean): FileAnalysis[] {
+    const files: FileAnalysis[] = [];
+
+    const scanDir = (currentPath: string) => {
+      try {
+        const entries = fs.readdirSync(currentPath, { withFileTypes: true });
+
+        for (const entry of entries) {
+          const fullPath = path.join(currentPath, entry.name);
+
+          // Skip hidden files
+          if (entry.name.startsWith('.')) {
+            continue;
+          }
+
+          if (entry.isDirectory() && recursive) {
+            scanDir(fullPath);
+          } else if (entry.isFile() && this.isSupportedExtension(fullPath)) {
+            try {
+              const stats = fs.statSync(fullPath);
+              const ext = path.extname(fullPath).toLowerCase();
+              
+              files.push({
+                filePath: fullPath,
+                fileName: entry.name,
+                folderPath: currentPath,
+                fileSize: stats.size,
+                mimeType: this.getMimeType(fullPath),
+                extension: ext,
+                category: this.getFileCategory(fullPath),
+                createdDate: stats.birthtime.toISOString(),
+              });
+            } catch (error) {
+              logService.warn(`Failed to read file metadata: ${fullPath}`);
+            }
+          }
+        }
+      } catch (error) {
+        logService.error(`Error scanning directory ${currentPath}:`, error as Error);
+      }
+    };
+
+    scanDir(dirPath);
+    return files;
+  }
 
   /**
    * Get existing folder by path from database
@@ -71,6 +226,135 @@ export class IndexFolderService {
 
     transaction(filePaths);
     return filePaths.length;
+  }
+
+  /**
+   * Analyze a folder without making any database changes
+   * Returns comprehensive analysis with file metadata, counts, and timing
+   */
+  async analyzeFolder(folderConfig: FolderConfig): Promise<FolderAnalysisResult> {
+    const { name, path: folderPath, recursive = false } = folderConfig;
+    const absolutePath = path.resolve(folderPath);
+
+    const overallStartTime = performance.now();
+    const timing: TimingBreakdown = {
+      filesystemScanMs: 0,
+      databaseQueryMs: 0,
+      deletionMarkingMs: 0,
+      totalMs: 0,
+    };
+
+    // Validate directory exists
+    if (!fs.existsSync(absolutePath)) {
+      throw new Error(`Directory does not exist: ${absolutePath}`);
+    }
+
+    const stats = fs.statSync(absolutePath);
+    if (!stats.isDirectory()) {
+      throw new Error(`Path is not a directory: ${absolutePath}`);
+    }
+
+    // Step 1: Scan filesystem
+    const fsStartTime = performance.now();
+    const filesOnDisk = this.scanDirectory(absolutePath, recursive);
+    timing.filesystemScanMs = performance.now() - fsStartTime;
+
+    // Step 2: Query database for existing files
+    const dbStartTime = performance.now();
+    const existingFolder = this.getExistingFolder(absolutePath);
+    const dbFiles = existingFolder 
+      ? this.getFilesInDatabase(absolutePath, recursive)
+      : new Set<string>();
+    timing.databaseQueryMs = performance.now() - dbStartTime;
+
+    // Step 3: Determine files to add
+    const filesToAdd: FileAnalysis[] = [];
+    const filesOnDiskSet = new Set<string>();
+    
+    for (const file of filesOnDisk) {
+      filesOnDiskSet.add(file.filePath);
+      if (!dbFiles.has(file.filePath)) {
+        filesToAdd.push(file);
+      }
+    }
+
+    // Step 4: Determine files to delete (in DB but not on disk)
+    const filesToDelete: string[] = [];
+    if (existingFolder) {
+      const deletionStartTime = performance.now();
+      
+      for (const dbFilePath of dbFiles) {
+        if (!filesOnDiskSet.has(dbFilePath)) {
+          filesToDelete.push(dbFilePath);
+        }
+      }
+      
+      timing.deletionMarkingMs = performance.now() - deletionStartTime;
+    }
+
+    // Calculate statistics
+    const filesByCategory = {
+      image: 0,
+      video: 0,
+    };
+
+    const filesByExtension: Record<string, number> = {};
+
+    for (const file of filesToAdd) {
+      filesByCategory[file.category]++;
+      
+      const ext = file.extension.toLowerCase();
+      filesByExtension[ext] = (filesByExtension[ext] || 0) + 1;
+    }
+
+    timing.totalMs = performance.now() - overallStartTime;
+
+    return {
+      folderName: name,
+      folderPath: absolutePath,
+      recursive,
+      totalFilesOnDisk: filesOnDisk.length,
+      filesAlreadyInDb: dbFiles.size,
+      filesToAdd,
+      filesToDelete,
+      filesByCategory,
+      filesByExtension,
+      timing,
+    };
+  }
+
+  /**
+   * Analyze all folders and create comprehensive report
+   */
+  async analyzeFolders(folderConfigs: FolderConfig[]): Promise<AnalysisReport> {
+    const startTime = performance.now();
+    const folders: FolderAnalysisResult[] = [];
+
+    for (const config of folderConfigs) {
+      const result = await this.analyzeFolder(config);
+      folders.push(result);
+    }
+
+    const totalFilesOnDisk = folders.reduce((sum, f) => sum + f.totalFilesOnDisk, 0);
+    const totalFilesToAdd = folders.reduce((sum, f) => sum + f.filesToAdd.length, 0);
+    const totalFilesToSkip = folders.reduce((sum, f) => sum + f.filesAlreadyInDb, 0);
+    const totalFilesToDelete = folders.reduce((sum, f) => sum + f.filesToDelete.length, 0);
+
+    const totalMs = performance.now() - startTime;
+
+    return {
+      timestamp: new Date().toISOString(),
+      totalFolders: folders.length,
+      totalFilesOnDisk,
+      totalFilesToAdd,
+      totalFilesToSkip,
+      totalFilesToDelete,
+      folders,
+      overallTiming: {
+        totalMs,
+        averageMsPerFolder: folders.length > 0 ? totalMs / folders.length : 0,
+      },
+    };
   }
 
   /**
