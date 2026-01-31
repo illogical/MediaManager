@@ -447,9 +447,9 @@ export class SqlService {
         if (this.tableExists(table)) {
           const countResult = this.queryOne<{ count: number }>(`SELECT COUNT(*) as count FROM ${table}`);
           const count = countResult?.count ?? 0;
-          
+
           this.execute(`DELETE FROM ${table}`);
-          
+
           if (count > 0) {
             logService.info(`Deleted ${count} record(s) from ${table}`);
             totalDeleted += count;

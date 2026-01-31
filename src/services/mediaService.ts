@@ -38,13 +38,13 @@ export function normalizeTagName(tagName: string): string {
 export function getAudioFileMetadata(filePath: string): AudioFileMetadata {
   const absolutePath = path.resolve(filePath);
   const ext = path.extname(absolutePath).toLowerCase();
-  
+
   // Validate that it's an audio file
-  const audioExtensions = ['.mp3', '.flac', '.wav'];
+  const audioExtensions = [".mp3", ".flac", ".wav"];
   if (!audioExtensions.includes(ext)) {
     throw new Error(`File is not a supported audio format: ${ext}`);
   }
-  
+
   // Check if file exists
   if (!fs.existsSync(absolutePath)) {
     return {
@@ -58,10 +58,10 @@ export function getAudioFileMetadata(filePath: string): AudioFileMetadata {
       exists: false,
     };
   }
-  
+
   // Get file stats
   const stats = fs.statSync(absolutePath);
-  
+
   return {
     filePath: absolutePath,
     fileName: path.basename(absolutePath),
@@ -79,11 +79,11 @@ export function getAudioFileMetadata(filePath: string): AudioFileMetadata {
  */
 function getMimeTypeForAudio(ext: string): string {
   const mimeTypes: Record<string, string> = {
-    '.mp3': 'audio/mpeg',
-    '.flac': 'audio/flac',
-    '.wav': 'audio/wav',
+    ".mp3": "audio/mpeg",
+    ".flac": "audio/flac",
+    ".wav": "audio/wav",
   };
-  return mimeTypes[ext] || 'application/octet-stream';
+  return mimeTypes[ext] || "application/octet-stream";
 }
 
 export class MediaService {
@@ -382,7 +382,7 @@ export class MediaService {
 
       if (existing) {
         logService.warn(`Tag '${tagName}' already applied to media ${mediaId}`);
-        throw new Error(`Tag already applied to media`);
+        throw new Error("Tag already applied to media");
       }
 
       // Add tag to media
@@ -458,10 +458,7 @@ export class MediaService {
       const normalizedName = normalizeTagName(name);
 
       // Check if tag already exists (case-insensitive)
-      const existing = sqlService.queryOne<Tag>(
-        "SELECT * FROM Tags WHERE LOWER(name) = ?",
-        [normalizedName]
-      );
+      const existing = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE LOWER(name) = ?", [normalizedName]);
 
       if (existing) {
         logService.warn(`Tag already exists: ${existing.name}`);

@@ -36,30 +36,19 @@ describe("SqlService", () => {
       sqlService.createAllTables();
 
       // Insert test data into multiple tables
-      sqlService.execute(
-        "INSERT INTO Folders (name, path) VALUES (?, ?)",
-        ["Test Folder", "/test/path"]
-      );
-      
-      sqlService.execute(
-        "INSERT INTO Tags (name) VALUES (?)",
-        ["Test Tag"]
-      );
-      
-      sqlService.execute(
-        "INSERT INTO MediaFiles (folder_path, file_name, file_path) VALUES (?, ?, ?)",
-        ["/test/path", "test.jpg", "/test/path/test.jpg"]
-      );
-      
-      sqlService.execute(
-        "INSERT INTO Playlists (name) VALUES (?)",
-        ["Test Playlist"]
-      );
-      
-      sqlService.execute(
-        "INSERT INTO Config (key, value) VALUES (?, ?)",
-        ["test_key", "test_value"]
-      );
+      sqlService.execute("INSERT INTO Folders (name, path) VALUES (?, ?)", ["Test Folder", "/test/path"]);
+
+      sqlService.execute("INSERT INTO Tags (name) VALUES (?)", ["Test Tag"]);
+
+      sqlService.execute("INSERT INTO MediaFiles (folder_path, file_name, file_path) VALUES (?, ?, ?)", [
+        "/test/path",
+        "test.jpg",
+        "/test/path/test.jpg",
+      ]);
+
+      sqlService.execute("INSERT INTO Playlists (name) VALUES (?)", ["Test Playlist"]);
+
+      sqlService.execute("INSERT INTO Config (key, value) VALUES (?, ?)", ["test_key", "test_value"]);
 
       // Verify data exists
       expect(sqlService.queryAll("SELECT * FROM Folders")).toHaveLength(1);
@@ -84,17 +73,11 @@ describe("SqlService", () => {
       sqlService.createAllTables();
 
       // Insert related data
-      sqlService.execute(
-        "INSERT INTO Folders (name, path) VALUES (?, ?)",
-        ["Test Folder", "/test/path"]
-      );
-      
-      const tagResult = sqlService.execute(
-        "INSERT INTO Tags (name) VALUES (?)",
-        ["Test Tag"]
-      );
+      sqlService.execute("INSERT INTO Folders (name, path) VALUES (?, ?)", ["Test Folder", "/test/path"]);
+
+      const tagResult = sqlService.execute("INSERT INTO Tags (name) VALUES (?)", ["Test Tag"]);
       const tagId = tagResult.lastInsertRowid;
-      
+
       const mediaResult = sqlService.execute(
         "INSERT INTO MediaFiles (folder_path, file_name, file_path) VALUES (?, ?, ?)",
         ["/test/path", "test.jpg", "/test/path/test.jpg"]
@@ -102,26 +85,18 @@ describe("SqlService", () => {
       const mediaId = mediaResult.lastInsertRowid;
 
       // Insert junction table records
-      sqlService.execute(
-        "INSERT INTO MediaTags (media_id, tag_id) VALUES (?, ?)",
-        [mediaId, tagId]
-      );
-      
-      sqlService.execute(
-        "INSERT INTO ViewHistory (media_id) VALUES (?)",
-        [mediaId]
-      );
+      sqlService.execute("INSERT INTO MediaTags (media_id, tag_id) VALUES (?, ?)", [mediaId, tagId]);
 
-      const playlistResult = sqlService.execute(
-        "INSERT INTO Playlists (name) VALUES (?)",
-        ["Test Playlist"]
-      );
+      sqlService.execute("INSERT INTO ViewHistory (media_id) VALUES (?)", [mediaId]);
+
+      const playlistResult = sqlService.execute("INSERT INTO Playlists (name) VALUES (?)", ["Test Playlist"]);
       const playlistId = playlistResult.lastInsertRowid;
 
-      sqlService.execute(
-        "INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)",
-        [playlistId, mediaId, 1]
-      );
+      sqlService.execute("INSERT INTO PlaylistMediaOrder (playlist_id, media_id, sort_order) VALUES (?, ?, ?)", [
+        playlistId,
+        mediaId,
+        1,
+      ]);
 
       // Verify data exists
       expect(sqlService.queryAll("SELECT * FROM MediaTags")).toHaveLength(1);
@@ -145,10 +120,7 @@ describe("SqlService", () => {
       sqlService.createAllTables();
 
       // Insert data into only some tables
-      sqlService.execute(
-        "INSERT INTO Folders (name, path) VALUES (?, ?)",
-        ["Test Folder", "/test/path"]
-      );
+      sqlService.execute("INSERT INTO Folders (name, path) VALUES (?, ?)", ["Test Folder", "/test/path"]);
 
       // Verify only one table has data
       expect(sqlService.queryAll("SELECT * FROM Folders")).toHaveLength(1);
@@ -167,10 +139,7 @@ describe("SqlService", () => {
       sqlService.createAllTables();
 
       // Insert test data
-      sqlService.execute(
-        "INSERT INTO Folders (name, path) VALUES (?, ?)",
-        ["Test Folder", "/test/path"]
-      );
+      sqlService.execute("INSERT INTO Folders (name, path) VALUES (?, ?)", ["Test Folder", "/test/path"]);
 
       // Reset first time
       sqlService.resetAllTables();

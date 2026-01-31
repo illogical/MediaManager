@@ -472,8 +472,8 @@ export class ReportGenerationService {
         <div class="folder-card">
             <div class="folder-header">
                 <div class="folder-name">${this.escapeHtml(folder.folderName)} ${
-          folder.recursive ? "🔄 (Recursive)" : ""
-        }</div>
+                  folder.recursive ? "🔄 (Recursive)" : ""
+                }</div>
                 <div class="folder-path">${this.escapeHtml(folder.folderPath)}</div>
             </div>
             
@@ -528,7 +528,11 @@ export class ReportGenerationService {
                 <strong>Timing:</strong> 
                 Filesystem: ${folder.timing.filesystemScanMs.toFixed(0)}ms | 
                 Database: ${folder.timing.databaseQueryMs.toFixed(0)}ms | 
-                ${folder.timing.deletionMarkingMs ? `Deletion Check: ${folder.timing.deletionMarkingMs.toFixed(0)}ms | ` : ""}
+                ${
+                  folder.timing.deletionMarkingMs
+                    ? `Deletion Check: ${folder.timing.deletionMarkingMs.toFixed(0)}ms | `
+                    : ""
+                }
                 Total: ${folder.timing.totalMs.toFixed(0)}ms
             </div>
         </div>
@@ -560,7 +564,7 @@ export class ReportGenerationService {
       )
       .join("");
 
-    return items || '<li class="extension-item"><span style="color: #999;">No files</span></li>';
+    return items || "<li class=\"extension-item\"><span style=\"color: #999;\">No files</span></li>";
   }
 
   /**
@@ -620,7 +624,10 @@ export class ReportGenerationService {
             <h2>📄 Files to be Added</h2>
             <div class="placeholder-box">
                 <h3>⚠️ Large File List (${totalFiles} files)</h3>
-                <p>The file list is too large to display here. Please refer to the JSON report for the complete list of files.</p>
+                <p>
+                  The file list is too large to display here. Please refer to the JSON report for the
+                  complete list of files.
+                </p>
             </div>
         </section>
     `;
@@ -669,6 +676,7 @@ export class ReportGenerationService {
       "<": "&lt;",
       ">": "&gt;",
       '"': "&quot;",
+      // eslint-disable-next-line quotes
       "'": "&#039;",
     };
     return text.replace(/[&<>"']/g, (m) => map[m]);

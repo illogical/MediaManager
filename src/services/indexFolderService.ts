@@ -22,7 +22,7 @@ export interface FileAnalysis {
   folderPath: string;
   mimeType: string;
   extension: string;
-  category: 'image' | 'video' | 'audio';
+  category: "image" | "video" | "audio";
   createdDate: string | null;
 }
 
@@ -84,7 +84,6 @@ export class IndexFolderService {
   ];
 
   private readonly imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
-  private readonly videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"];
   private readonly audioExtensions = [".mp3", ".flac", ".wav"];
 
   constructor(
@@ -103,15 +102,15 @@ export class IndexFolderService {
   /**
    * Get file category based on extension
    */
-  private getFileCategory(filePath: string): 'image' | 'video' | 'audio' {
+  private getFileCategory(filePath: string): "image" | "video" | "audio" {
     const ext = path.extname(filePath).toLowerCase();
     if (this.imageExtensions.includes(ext)) {
-      return 'image';
+      return "image";
     }
     if (this.audioExtensions.includes(ext)) {
-      return 'audio';
+      return "audio";
     }
-    return 'video';
+    return "video";
   }
 
   /**
@@ -152,7 +151,7 @@ export class IndexFolderService {
           const fullPath = path.join(currentPath, entry.name);
 
           // Skip hidden files
-          if (entry.name.startsWith('.')) {
+          if (entry.name.startsWith(".")) {
             continue;
           }
 
@@ -162,7 +161,7 @@ export class IndexFolderService {
             try {
               const stats = fs.statSync(fullPath);
               const ext = path.extname(fullPath).toLowerCase();
-              
+
               files.push({
                 filePath: fullPath,
                 fileName: entry.name,
@@ -272,15 +271,13 @@ export class IndexFolderService {
     // Step 2: Query database for existing files
     const dbStartTime = performance.now();
     const existingFolder = this.getExistingFolder(absolutePath);
-    const dbFiles = existingFolder 
-      ? this.getFilesInDatabase(absolutePath, recursive)
-      : new Set<string>();
+    const dbFiles = existingFolder ? this.getFilesInDatabase(absolutePath, recursive) : new Set<string>();
     timing.databaseQueryMs = performance.now() - dbStartTime;
 
     // Step 3: Determine files to add
     const filesToAdd: FileAnalysis[] = [];
     const filesOnDiskSet = new Set<string>();
-    
+
     for (const file of filesOnDisk) {
       filesOnDiskSet.add(file.filePath);
       if (!dbFiles.has(file.filePath)) {
@@ -292,13 +289,13 @@ export class IndexFolderService {
     const filesToDelete: string[] = [];
     if (existingFolder) {
       const deletionStartTime = performance.now();
-      
+
       for (const dbFilePath of dbFiles) {
         if (!filesOnDiskSet.has(dbFilePath)) {
           filesToDelete.push(dbFilePath);
         }
       }
-      
+
       timing.deletionMarkingMs = performance.now() - deletionStartTime;
     }
 
@@ -313,7 +310,7 @@ export class IndexFolderService {
 
     for (const file of filesToAdd) {
       filesByCategory[file.category]++;
-      
+
       const ext = file.extension.toLowerCase();
       filesByExtension[ext] = (filesByExtension[ext] || 0) + 1;
     }
@@ -403,9 +400,9 @@ export class IndexFolderService {
       logService.info(`Files in database: ${dbFiles.size}`);
 
       // Scan filesystem to get current files (pass initialTags for new files only)
-      const scanResult = this.fileSystemService.scan(absolutePath, { 
+      const scanResult = this.fileSystemService.scan(absolutePath, {
         recursive,
-        initialTags: folderConfig.initialTags 
+        initialTags: folderConfig.initialTags,
       });
 
       // Get files that are in database but no longer on filesystem
@@ -435,7 +432,8 @@ export class IndexFolderService {
       }
 
       logService.info(
-        `Scan result - Added: ${scanResult.filesAdded}, Skipped: ${scanResult.filesSkipped}, Errors: ${scanResult.errors}`
+        `Scan result - Added: ${scanResult.filesAdded}, ` +
+          `Skipped: ${scanResult.filesSkipped}, Errors: ${scanResult.errors}`
       );
     } else {
       logService.info("Creating new folder in database...");
@@ -446,13 +444,14 @@ export class IndexFolderService {
 
         // Scan directory for files
         logService.info("Scanning directory for media files...");
-        const scanResult = this.fileSystemService.scan(absolutePath, { 
+        const scanResult = this.fileSystemService.scan(absolutePath, {
           recursive,
-          initialTags: folderConfig.initialTags 
+          initialTags: folderConfig.initialTags,
         });
 
         logService.info(
-          `Scan result - Added: ${scanResult.filesAdded}, Skipped: ${scanResult.filesSkipped}, Errors: ${scanResult.errors}`
+          `Scan result - Added: ${scanResult.filesAdded}, ` +
+            `Skipped: ${scanResult.filesSkipped}, Errors: ${scanResult.errors}`
         );
       } catch (error) {
         if (error instanceof FolderAlreadyExistsError) {

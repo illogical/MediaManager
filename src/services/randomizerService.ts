@@ -5,7 +5,7 @@
 import { logService } from "./logService";
 import type { MediaFile } from "../api/schemas";
 
-export type PrioritizationAlgorithm = 
+export type PrioritizationAlgorithm =
   | "random"
   | "unviewed_first"
   | "least_viewed"
@@ -36,9 +36,7 @@ export class RandomizerService {
 
     try {
       // Filter out disliked media if requested
-      let filteredMedia = excludeDisliked 
-        ? mediaFiles.filter(media => media.like_count >= 0)
-        : [...mediaFiles];
+      let filteredMedia = excludeDisliked ? mediaFiles.filter((media) => media.like_count >= 0) : [...mediaFiles];
 
       if (filteredMedia.length === 0) {
         logService.warn("No media files after filtering");
@@ -74,7 +72,7 @@ export class RandomizerService {
       // Map to output format with index
       const result = sortedMedia.map((media, idx) => ({
         id: media.id,
-        idx: idx
+        idx: idx,
       }));
 
       logService.info(`Randomization complete: ${result.length} media files ordered`);
@@ -101,8 +99,8 @@ export class RandomizerService {
    * Prioritize unviewed media (last_viewed is null), then shuffle the rest
    */
   private prioritizeUnviewed(mediaFiles: MediaFile[]): MediaFile[] {
-    const unviewed = mediaFiles.filter(m => m.last_viewed === null);
-    const viewed = mediaFiles.filter(m => m.last_viewed !== null);
+    const unviewed = mediaFiles.filter((m) => m.last_viewed === null);
+    const viewed = mediaFiles.filter((m) => m.last_viewed !== null);
 
     const shuffledUnviewed = this.shuffleRandom(unviewed);
     const shuffledViewed = this.shuffleRandom(viewed);
@@ -151,13 +149,11 @@ export class RandomizerService {
    * Nulls (never viewed) come first, then shuffle within groups
    */
   private prioritizeOldestFirst(mediaFiles: MediaFile[]): MediaFile[] {
-    const neverViewed = mediaFiles.filter(m => m.last_viewed === null);
-    const viewed = mediaFiles.filter(m => m.last_viewed !== null);
+    const neverViewed = mediaFiles.filter((m) => m.last_viewed === null);
+    const viewed = mediaFiles.filter((m) => m.last_viewed !== null);
 
     // Sort viewed by last_viewed ascending
-    const sortedViewed = viewed.sort((a, b) => 
-      this.compareDates(a.last_viewed, b.last_viewed)
-    );
+    const sortedViewed = viewed.sort((a, b) => this.compareDates(a.last_viewed, b.last_viewed));
 
     const shuffledNeverViewed = this.shuffleRandom(neverViewed);
 
@@ -174,7 +170,7 @@ export class RandomizerService {
   ): MediaFile[] {
     // Group by primary value
     const groups = new Map<number, MediaFile[]>();
-    
+
     for (const media of mediaFiles) {
       const key = primaryComparator(media, mediaFiles[0]) === 0 ? 0 : media.view_count || media.like_count;
       if (!groups.has(key)) {
@@ -197,7 +193,7 @@ export class RandomizerService {
       const primaryKey = this.getPrimaryKey(media, primaryComparator);
       const secondaryKey = this.getSecondaryKey(media, secondaryComparator);
       const key = `${primaryKey}-${secondaryKey}`;
-      
+
       if (!finalGroups.has(key)) {
         finalGroups.set(key, []);
       }

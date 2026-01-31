@@ -65,7 +65,7 @@ describe("Audio File Support", () => {
         "SELECT file_name, mime_type FROM MediaFiles"
       );
       expect(files).toHaveLength(3);
-      
+
       const fileNames = files.map((f) => f.file_name).sort();
       expect(fileNames).toEqual(["song1.mp3", "song2.flac", "sound.wav"]);
     });
@@ -209,18 +209,14 @@ describe("Audio File Support", () => {
       const filePath = path.join(testDir, "test.txt");
       fs.writeFileSync(filePath, "test");
 
-      expect(() => getAudioFileMetadata(filePath)).toThrow(
-        "File is not a supported audio format: .txt"
-      );
+      expect(() => getAudioFileMetadata(filePath)).toThrow("File is not a supported audio format: .txt");
     });
 
     it("should throw error for video file extension", () => {
       const filePath = path.join(testDir, "test.mp4");
       fs.writeFileSync(filePath, "test");
 
-      expect(() => getAudioFileMetadata(filePath)).toThrow(
-        "File is not a supported audio format: .mp4"
-      );
+      expect(() => getAudioFileMetadata(filePath)).toThrow("File is not a supported audio format: .mp4");
     });
 
     it("should work with absolute and relative paths", () => {

@@ -469,13 +469,16 @@
     - [x] Create getAudioFileMetadata() function in mediaService
     - [x] Extract basic file information (no database storage)
     - [x] Support mp3, flac, wav formats
-- [ ] Update API documentation for audio file support
-    - [ ] Document audio MIME types in API.md
-    - [ ] Add examples for audio file filtering
-- [ ] Add tests for audio file support
-    - [ ] Test audio file extension detection
-    - [ ] Test audio MIME type mapping
-    - [ ] Test audio metadata retrieval
+- [x] Update documentation for audio file support
+    - [x] Document audio MIME types in SPECIFICATION.md
+    - [x] Add audio file support section to README.md
+    - [x] Update TASKS.md with audio file tasks
+- [x] Add tests for audio file support
+    - [x] Test audio file extension detection
+    - [x] Test audio MIME type mapping
+    - [x] Test audio metadata retrieval
+    - [x] Test audio file categorization in reports
+    - [x] Test integration workflow (13 comprehensive tests)
 - [ ] Future audio enhancements (post-MVP)
     - [ ] Audio player component for frontend
     - [ ] Audio waveform visualization
