@@ -7,7 +7,7 @@
     - [x] Server-side filesystem access with REST API
 - [x] Complete database schema in DATABASE.md
     - [x] Add all table definitions with fields, types, and constraints
-    - [x] MediaFiles: Add fields for file_size, width, height, mime_type, created_date, file_hash
+    - [x] MediaFiles: Add fields for width, height, mime_type, created_date, file_hash
     - [x] Add indexes: folder_path, last_viewed, like_count, view_count
     - [x] Clarify like_count as integer: negative=dislike (-1), zero=undecided (0), positive=like count
     - [x] Create Folders table for folder metadata

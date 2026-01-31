@@ -19,7 +19,6 @@ export interface FileAnalysis {
   filePath: string;
   fileName: string;
   folderPath: string;
-  fileSize: number;
   mimeType: string;
   extension: string;
   category: 'image' | 'video';
@@ -156,7 +155,6 @@ export class IndexFolderService {
                 filePath: fullPath,
                 fileName: entry.name,
                 folderPath: currentPath,
-                fileSize: stats.size,
                 mimeType: this.getMimeType(fullPath),
                 extension: ext,
                 category: this.getFileCategory(fullPath),

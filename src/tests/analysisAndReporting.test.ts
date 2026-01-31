@@ -290,7 +290,6 @@ describe("Analysis and Reporting", () => {
     expect(fileData.fileName).toBe("photo1.jpg");
     expect(fileData.filePath).toBe(file1);
     expect(fileData.folderPath).toBe(testDir);
-    expect(fileData.fileSize).toBeGreaterThan(0);
     expect(fileData.mimeType).toBe("image/jpeg");
     expect(fileData.extension).toBe(".jpg");
     expect(fileData.category).toBe("image");

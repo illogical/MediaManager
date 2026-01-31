@@ -86,21 +86,18 @@ export class FileSystemService {
    * Extract file metadata
    */
   private getFileMetadata(filePath: string): {
-    file_size: number | null;
     mime_type: string;
     created_date: string | null;
   } {
     try {
       const stats = fs.statSync(filePath);
       return {
-        file_size: stats.size,
         mime_type: this.getMimeType(filePath),
         created_date: stats.birthtime.toISOString(),
       };
     } catch (error) {
       logService.warn(`Failed to get metadata for ${filePath}: ${(error as Error).message}`);
       return {
-        file_size: null,
         mime_type: this.getMimeType(filePath),
         created_date: null,
       };
@@ -167,7 +164,6 @@ export class FileSystemService {
       folder_path: string;
       file_name: string;
       file_path: string;
-      file_size: number | null;
       mime_type: string;
       created_date: string | null;
     }>
@@ -187,9 +183,9 @@ export class FileSystemService {
         const db = this.sqlService.getDb();
         const insertStmt = db.prepare(`
           INSERT INTO MediaFiles (
-            folder_path, file_name, file_path, file_size, mime_type,
+            folder_path, file_name, file_path, mime_type,
             width, height, created_date, view_count, last_viewed, like_count, is_deleted
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
         const transaction = db.transaction((items: typeof batch) => {
@@ -198,7 +194,6 @@ export class FileSystemService {
               file.folder_path,
               file.file_name,
               file.file_path,
-              file.file_size,
               file.mime_type,
               null, // width - set to null for now
               null, // height - set to null for now
@@ -304,7 +299,6 @@ export class FileSystemService {
         folder_path: string;
         file_name: string;
         file_path: string;
-        file_size: number | null;
         mime_type: string;
         created_date: string | null;
       }> = [];
@@ -319,7 +313,6 @@ export class FileSystemService {
             folder_path: path.dirname(filePath),
             file_name: path.basename(filePath),
             file_path: filePath,
-            file_size: metadata.file_size,
             mime_type: metadata.mime_type,
             created_date: metadata.created_date,
           });

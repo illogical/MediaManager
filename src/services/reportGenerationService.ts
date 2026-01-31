@@ -574,7 +574,6 @@ export class ReportGenerationService {
             <td>${this.escapeHtml(file.fileName)}</td>
             <td><span class="badge ${file.category}">${file.category}</span></td>
             <td>${file.extension}</td>
-            <td class="file-size">${this.formatFileSize(file.fileSize)}</td>
             <td class="file-path">${this.escapeHtml(file.filePath)}</td>
         </tr>
     `
@@ -590,7 +589,6 @@ export class ReportGenerationService {
                         <th>File Name</th>
                         <th>Type</th>
                         <th>Extension</th>
-                        <th>Size</th>
                         <th>Path</th>
                     </tr>
                 </thead>
@@ -649,17 +647,6 @@ export class ReportGenerationService {
             });
         });
     `;
-  }
-
-  /**
-   * Format file size
-   */
-  private formatFileSize(bytes: number): string {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
 
   /**

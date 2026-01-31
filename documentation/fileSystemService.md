@@ -84,7 +84,6 @@ When a file is added, the following fields are populated:
 - `folder_path`: Absolute path to the folder containing the file
 - `file_name`: Name of the file
 - `file_path`: Absolute path to the file
-- `file_size`: Size in bytes
 - `mime_type`: MIME type based on extension
 - `created_date`: File creation date
 - `width`: Set to NULL (for future enhancement)

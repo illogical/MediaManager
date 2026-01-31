@@ -129,7 +129,6 @@ Each file includes:
 - `filePath`: Full absolute path
 - `fileName`: Base filename
 - `folderPath`: Parent directory
-- `fileSize`: Size in bytes
 - `mimeType`: MIME type (e.g., "image/jpeg")
 - `extension`: File extension (e.g., ".jpg")
 - `category`: "image" or "video"

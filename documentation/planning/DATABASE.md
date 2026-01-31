@@ -27,7 +27,6 @@ CREATE TABLE MediaFiles (
     folder_path TEXT NOT NULL,
     file_name TEXT NOT NULL,
     file_path TEXT NOT NULL UNIQUE,
-    file_size INTEGER,
     mime_type TEXT,
     width INTEGER,
     height INTEGER,
@@ -52,7 +51,6 @@ CREATE INDEX idx_media_created_date ON MediaFiles(created_date);
 - `folder_path`: Path to the folder containing this media file
 - `file_name`: Name of the file (e.g., "IMG_001.jpg")
 - `file_path`: Full absolute path to the file (unique)
-- `file_size`: File size in bytes
 - `mime_type`: MIME type of the file (e.g., "image/jpeg", "video/mp4")
 - `width`: Image/video width in pixels
 - `height`: Image/video height in pixels
@@ -355,8 +353,8 @@ For development and testing, populate with sample data:
 INSERT INTO Folders (name, path) VALUES ('Test Photos', '/test/photos');
 
 -- Insert test media files
-INSERT INTO MediaFiles (folder_path, filename, file_path, file_size, mime_type, width, height)
-VALUES ('/test/photos', 'test1.jpg', '/test/photos/test1.jpg', 1024000, 'image/jpeg', 1920, 1080);
+INSERT INTO MediaFiles (folder_path, filename, file_path, mime_type, width, height)
+VALUES ('/test/photos', 'test1.jpg', '/test/photos/test1.jpg', 'image/jpeg', 1920, 1080);
 
 -- Insert test tags
 INSERT INTO Tags (name, color) VALUES ('test', '#3b82f6');

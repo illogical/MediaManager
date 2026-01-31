@@ -10,7 +10,6 @@ export const MediaFileSchema = z.object({
   folder_path: z.string(),
   file_name: z.string(),
   file_path: z.string(),
-  file_size: z.number().nullable(),
   mime_type: z.string().nullable(),
   width: z.number().nullable(),
   height: z.number().nullable(),

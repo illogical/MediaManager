@@ -32,7 +32,7 @@ describe("RandomizerService", () => {
     folder_path: "/test",
     file_name: "test.jpg",
     file_path: "/test/test.jpg",
-    file_size: 1024,
+
     mime_type: "image/jpeg",
     width: 1920,
     height: 1080,

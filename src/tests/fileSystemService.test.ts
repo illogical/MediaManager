@@ -164,9 +164,8 @@ describe("FileSystemService", () => {
       file_size: number;
       mime_type: string;
       created_date: string;
-    }>("SELECT file_size, mime_type, created_date FROM MediaFiles WHERE file_name = ?", ["image.jpg"]);
+    }>("SELECT mime_type, created_date FROM MediaFiles WHERE file_name = ?", ["image.jpg"]);
 
-    expect(file?.file_size).toBe(testContent.length);
     expect(file?.mime_type).toBe("image/jpeg");
     expect(file?.created_date).toBeDefined();
   });

@@ -91,7 +91,6 @@ curl "http://localhost:17102/api/media?sort=like_count_desc&limit=10"
       "folder_path": "/test/photos",
       "file_name": "test1.jpg",
       "file_path": "/test/photos/test1.jpg",
-      "file_size": 1024000,
       "mime_type": "image/jpeg",
       "width": 1920,
       "height": 1080,

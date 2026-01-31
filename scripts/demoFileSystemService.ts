@@ -77,12 +77,12 @@ async function main() {
     logService.info(`Result: Added=${result3.filesAdded}, Skipped=${result3.filesSkipped}, Errors=${result3.errors}`);
 
     // Show all files in database
-    const files3 = sqlService.queryAll<{ file_name: string; file_path: string; mime_type: string; file_size: number }>(
-      "SELECT file_name, file_path, mime_type, file_size FROM MediaFiles ORDER BY file_name"
+    const files3 = sqlService.queryAll<{ file_name: string; file_path: string; mime_type: string }>(
+      "SELECT file_name, file_path, mime_type FROM MediaFiles ORDER BY file_name"
     );
     logService.info(`\nTotal files in database after recursive scan: ${files3.length}`);
     files3.forEach((file) => {
-      logService.info(`  - ${file.file_name} (${file.mime_type}, ${file.file_size} bytes)`);
+      logService.info(`  - ${file.file_name} (${file.mime_type})`);
     });
 
     // Demo 4: Verify width and height are null

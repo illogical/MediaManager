@@ -20,7 +20,7 @@ npm run db:create
 ```
 
 **What it creates:**
-- MediaFiles table (with mime_type and file_size fields)
+- MediaFiles table (with mime_type field)
 - Folders table
 - Tags table
 - MediaTags junction table
