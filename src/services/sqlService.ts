@@ -440,18 +440,29 @@ export class SqlService {
       "Config",
     ];
 
+    let totalDeleted = 0;
+
     const transaction = this.getDb().transaction(() => {
       for (const table of tablesToReset) {
         if (this.tableExists(table)) {
+          const countResult = this.queryOne<{ count: number }>(`SELECT COUNT(*) as count FROM ${table}`);
+          const count = countResult?.count ?? 0;
+          
           this.execute(`DELETE FROM ${table}`);
-          logService.info(`Deleted all records from ${table}`);
+          
+          if (count > 0) {
+            logService.info(`Deleted ${count} record(s) from ${table}`);
+            totalDeleted += count;
+          } else {
+            logService.info(`No records to delete from ${table}`);
+          }
         }
       }
     });
 
     try {
       transaction();
-      logService.info("All database tables reset successfully");
+      logService.info(`All database tables reset successfully. Total records deleted: ${totalDeleted}`);
     } catch (error) {
       logService.error("Failed to reset database tables", error as Error);
       throw error;

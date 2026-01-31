@@ -15,6 +15,7 @@ export interface ScanResult {
 
 export interface ScanOptions {
   recursive?: boolean;
+  initialTags?: string[];
 }
 
 export class FolderAlreadyExistsError extends Error {
@@ -166,13 +167,15 @@ export class FileSystemService {
       file_path: string;
       mime_type: string;
       created_date: string | null;
-    }>
+    }>,
+    initialTags?: string[]
   ): number {
     if (files.length === 0) {
       return 0;
     }
 
     let insertedCount = 0;
+    const mediaIdsForTagging: number[] = [];
 
     // Process files in batches
     for (let i = 0; i < files.length; i += this.batchSize) {
@@ -190,7 +193,7 @@ export class FileSystemService {
 
         const transaction = db.transaction((items: typeof batch) => {
           for (const file of items) {
-            insertStmt.run(
+            const result = insertStmt.run(
               file.folder_path,
               file.file_name,
               file.file_path,
@@ -203,6 +206,10 @@ export class FileSystemService {
               0, // like_count
               0 // is_deleted
             );
+            // Store media ID for tag application
+            if (initialTags && initialTags.length > 0) {
+              mediaIdsForTagging.push(result.lastInsertRowid as number);
+            }
           }
         });
 
@@ -214,7 +221,87 @@ export class FileSystemService {
       }
     }
 
+    // Apply initial tags to newly inserted media files
+    if (initialTags && initialTags.length > 0 && mediaIdsForTagging.length > 0) {
+      this.applyInitialTags(mediaIdsForTagging, initialTags);
+    }
+
     return insertedCount;
+  }
+
+  /**
+   * Apply initial tags to media files (only if they have no existing tags)
+   */
+  private applyInitialTags(mediaIds: number[], tagNames: string[]): void {
+    logService.info(`Applying initial tags to ${mediaIds.length} media files: [${tagNames.join(", ")}]`);
+
+    // Create or get tags (defer to after we confirm db is available)
+    const tagIds: number[] = [];
+    for (const tagName of tagNames) {
+      try {
+        // Normalize tag name
+        const normalizedName = tagName.trim().toLowerCase();
+
+        // Check if tag already exists (case-insensitive)
+        const existing = this.sqlService.queryOne<{ id: number; name: string }>(
+          "SELECT * FROM Tags WHERE LOWER(name) = ?",
+          [normalizedName]
+        );
+
+        if (existing) {
+          tagIds.push(existing.id);
+        } else {
+          // Create new tag with normalized name
+          const result = this.sqlService.execute("INSERT INTO Tags (name) VALUES (?)", [normalizedName]);
+          tagIds.push(result.lastInsertRowid as number);
+          logService.info(`Created tag: ${normalizedName}`);
+        }
+      } catch (error) {
+        logService.error(`Failed to create/get tag: ${tagName}`, error as Error);
+      }
+    }
+
+    if (tagIds.length === 0) {
+      logService.warn("No valid tags to apply");
+      return;
+    }
+
+    // Apply tags to each media file that has no existing tags
+    const db = this.sqlService.getDb();
+    let taggedCount = 0;
+
+    for (const mediaId of mediaIds) {
+      try {
+        // Check if media file already has tags
+        const existingTags = this.sqlService.queryAll<{ count: number }>(
+          "SELECT COUNT(*) as count FROM MediaTags WHERE media_id = ?",
+          [mediaId]
+        );
+
+        if (existingTags[0]?.count > 0) {
+          logService.trace(`Media ${mediaId} already has tags, skipping initial tags`);
+          continue;
+        }
+
+        // Apply each tag
+        const insertStmt = db.prepare(`
+          INSERT OR IGNORE INTO MediaTags (media_id, tag_id) VALUES (?, ?)
+        `);
+
+        const transaction = db.transaction(() => {
+          for (const tagId of tagIds) {
+            insertStmt.run(mediaId, tagId);
+          }
+        });
+
+        transaction();
+        taggedCount++;
+      } catch (error) {
+        logService.error(`Failed to apply tags to media ${mediaId}`, error as Error);
+      }
+    }
+
+    logService.info(`Applied initial tags to ${taggedCount} media files`);
   }
 
   /**
@@ -323,7 +410,7 @@ export class FileSystemService {
 
       // Insert files in batches
       if (filesToAdd.length > 0) {
-        const inserted = this.insertFilesBatch(filesToAdd);
+        const inserted = this.insertFilesBatch(filesToAdd, options.initialTags);
         result.filesAdded = inserted;
         logService.info(`Successfully added ${inserted} files to database`);
       }

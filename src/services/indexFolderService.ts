@@ -13,6 +13,7 @@ export interface FolderConfig {
   name: string;
   path: string;
   recursive?: boolean;
+  initialTags?: string[];
 }
 
 export interface FileAnalysis {
@@ -389,8 +390,11 @@ export class IndexFolderService {
       const dbFiles = this.getFilesInDatabase(absolutePath, recursive);
       logService.info(`Files in database: ${dbFiles.size}`);
 
-      // Scan filesystem to get current files
-      const scanResult = this.fileSystemService.scan(absolutePath, { recursive });
+      // Scan filesystem to get current files (pass initialTags for new files only)
+      const scanResult = this.fileSystemService.scan(absolutePath, { 
+        recursive,
+        initialTags: folderConfig.initialTags 
+      });
 
       // Get files that are in database but no longer on filesystem
       const filesOnDisk = new Set<string>();
@@ -430,7 +434,10 @@ export class IndexFolderService {
 
         // Scan directory for files
         logService.info("Scanning directory for media files...");
-        const scanResult = this.fileSystemService.scan(absolutePath, { recursive });
+        const scanResult = this.fileSystemService.scan(absolutePath, { 
+          recursive,
+          initialTags: folderConfig.initialTags 
+        });
 
         logService.info(
           `Scan result - Added: ${scanResult.filesAdded}, Skipped: ${scanResult.filesSkipped}, Errors: ${scanResult.errors}`

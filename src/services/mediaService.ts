@@ -6,6 +6,13 @@ import { sqlService } from "./sqlService";
 import { logService } from "./logService";
 import type { MediaFile, MediaFileWithTags, MediaListQuery, Tag } from "../api/schemas";
 
+/**
+ * Normalize a tag name (trim whitespace, convert to lowercase for case-insensitive comparison)
+ */
+export function normalizeTagName(tagName: string): string {
+  return tagName.trim().toLowerCase();
+}
+
 export class MediaService {
   /**
    * Get media files with optional filtering and sorting, including tags for each media file
@@ -374,18 +381,24 @@ export class MediaService {
     logService.trace(`MediaService.createTag("${name}") called`);
 
     try {
-      // Check if tag already exists
-      const existing = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE name = ?", [name]);
+      // Normalize tag name
+      const normalizedName = normalizeTagName(name);
+
+      // Check if tag already exists (case-insensitive)
+      const existing = sqlService.queryOne<Tag>(
+        "SELECT * FROM Tags WHERE LOWER(name) = ?",
+        [normalizedName]
+      );
 
       if (existing) {
-        logService.warn(`Tag already exists: ${name}`);
+        logService.warn(`Tag already exists: ${existing.name}`);
         return existing;
       }
 
-      // Create new tag
-      const result = sqlService.execute("INSERT INTO Tags (name) VALUES (?)", [name]);
+      // Create new tag with normalized name
+      const result = sqlService.execute("INSERT INTO Tags (name) VALUES (?)", [normalizedName]);
 
-      logService.info(`Created tag: ${name}`);
+      logService.info(`Created tag: ${normalizedName}`);
 
       const newTag = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE id = ?", [result.lastInsertRowid]);
 
