@@ -22,7 +22,7 @@ export interface FileAnalysis {
   folderPath: string;
   mimeType: string;
   extension: string;
-  category: 'image' | 'video';
+  category: 'image' | 'video' | 'audio';
   createdDate: string | null;
 }
 
@@ -44,6 +44,7 @@ export interface FolderAnalysisResult {
   filesByCategory: {
     image: number;
     video: number;
+    audio: number;
   };
   filesByExtension: Record<string, number>;
   timing: TimingBreakdown;
@@ -77,10 +78,14 @@ export class IndexFolderService {
     ".mov",
     ".avi",
     ".mkv",
+    ".mp3",
+    ".flac",
+    ".wav",
   ];
 
   private readonly imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
   private readonly videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"];
+  private readonly audioExtensions = [".mp3", ".flac", ".wav"];
 
   constructor(
     private sqlService: SqlService,
@@ -98,10 +103,13 @@ export class IndexFolderService {
   /**
    * Get file category based on extension
    */
-  private getFileCategory(filePath: string): 'image' | 'video' {
+  private getFileCategory(filePath: string): 'image' | 'video' | 'audio' {
     const ext = path.extname(filePath).toLowerCase();
     if (this.imageExtensions.includes(ext)) {
       return 'image';
+    }
+    if (this.audioExtensions.includes(ext)) {
+      return 'audio';
     }
     return 'video';
   }
@@ -123,6 +131,9 @@ export class IndexFolderService {
       ".mov": "video/quicktime",
       ".avi": "video/x-msvideo",
       ".mkv": "video/x-matroska",
+      ".mp3": "audio/mpeg",
+      ".flac": "audio/flac",
+      ".wav": "audio/wav",
     };
     return mimeTypes[ext] || "application/octet-stream";
   }
@@ -295,6 +306,7 @@ export class IndexFolderService {
     const filesByCategory = {
       image: 0,
       video: 0,
+      audio: 0,
     };
 
     const filesByExtension: Record<string, number> = {};

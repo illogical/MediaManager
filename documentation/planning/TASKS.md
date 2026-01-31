@@ -460,6 +460,29 @@
     - [ ] Minimize bundle size
     - [ ] Lighthouse audit and optimization
 
+## Audio File Support
+- [x] Add audio file extensions to backend
+    - [x] Update indexFolderService to recognize .mp3, .flac, .wav
+    - [x] Update reportGenerationService to include audio category
+    - [x] Add MIME type detection for audio formats
+- [x] Add utility function for audio metadata retrieval
+    - [x] Create getAudioFileMetadata() function in mediaService
+    - [x] Extract basic file information (no database storage)
+    - [x] Support mp3, flac, wav formats
+- [ ] Update API documentation for audio file support
+    - [ ] Document audio MIME types in API.md
+    - [ ] Add examples for audio file filtering
+- [ ] Add tests for audio file support
+    - [ ] Test audio file extension detection
+    - [ ] Test audio MIME type mapping
+    - [ ] Test audio metadata retrieval
+- [ ] Future audio enhancements (post-MVP)
+    - [ ] Audio player component for frontend
+    - [ ] Audio waveform visualization
+    - [ ] Audio duration extraction
+    - [ ] Audio thumbnail generation (album art)
+    - [ ] Audio-specific metadata (artist, album, bitrate)
+
 ## Phase 8: Testing & Documentation
 - [ ] Setup testing infrastructure
     - [ ] Install Vitest and testing libraries

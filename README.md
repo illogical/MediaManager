@@ -1,6 +1,6 @@
 # MediaManager
 
-A web-based multimedia viewer and organizer application designed for quickly browsing, tagging, and categorizing large collections of photos and videos with powerful randomization algorithms and intelligent filtering.
+A web-based multimedia viewer and organizer application designed for quickly browsing, tagging, and categorizing large collections of photos, videos, and audio files with powerful randomization algorithms and intelligent filtering.
 
 ## Objective
 
@@ -26,12 +26,12 @@ MediaManager provides an immersive, content-first interface for reviewing media 
 - **Overlay UI**: Slide-in navigation bars that hide during focused viewing (toggle with Space key)
 
 ### Organization & Filtering
-- **Folder Configuration**: Select from multiple monitored folders containing images and/or videos
+- **Folder Configuration**: Select from multiple monitored folders containing images, videos, and/or audio files
 - **Tag System**: Add multiple tags to media with autocomplete support
   - Tags are searchable and filterable
   - View usage count for each tag
 - **Smart Filters**:
-  - By media type (Images, Videos, or Both)
+  - By media type (Images, Videos, Audio, or All)
   - By like status (Liked, Disliked, or Undecided)
   - By viewed status (Unviewed only)
   - By one or more tags (AND logic)

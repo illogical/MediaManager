@@ -22,7 +22,7 @@ Videos should be zoomed to fit full-page without affecting the original aspect r
 ## Development Approach
 - Phase 1-3: Frontend-only with mock data and localStorage
 - Phase 4+: Full-stack integration with Bun.js backend
-- Images first, video and music support in later phases
+- Images first, video support in Phase 6, audio support added incrementally
 # Features
 
 - Configuration JSON schema for selected folder locations that contain images and/or videos to display as options on the website’s navigation bar
@@ -35,17 +35,17 @@ Videos should be zoomed to fit full-page without affecting the original aspect r
     - Counter value of 0 means undecided/neutral
     - Visual feedback shows current like count on the button
 - Ability to filter by folder and by tag
-- Ability to filter by images or videos and remember the choice for each selected folder
+- Ability to filter by images, videos, or audio files and remember the choice for each selected folder
 - Ability to filter by likes or dislikes
 - Ability to view a view history list
     - Displays the last 20 viewed items
-- Custom algorithm for randomly choosing an image or video to play
+- Custom algorithm for randomly choosing an image, video, or audio file to play
     - Ability to store the randomization as a named playlist
     - Support for selecting from a list a playlists
-- Ability to take action only disliked images and videos in bulk
+- Ability to take action only disliked images, videos, and audio files in bulk
     - A filter to view and select disliked content along with a delete button that will accept an array of file paths and will move them to a temporary directory to be reviewed later
 - Ability to start where the user had left off
-    - Remember the last viewed folder and image or video
+    - Remember the last viewed folder and image, video, or audio file
         - Need to serialize details such as folder path, media type, sort order, and/or additional filters to be able to apply them again next the page is visited
         - Needs to serialize the current randomization order (store in a lookup table of order to media ID)
 
@@ -641,6 +641,48 @@ interface LocalStorageSchema {
 - Buffer management for large files
 - Mobile device playback compatibility
 - Hardware acceleration support
+
+# Audio File Support
+
+*Note: Audio file support is being implemented in the backend. UI support is planned for future phases.*
+
+## Supported Formats
+- **MP3**: MPEG Audio Layer 3 (audio/mpeg)
+- **FLAC**: Free Lossless Audio Codec (audio/flac)
+- **WAV**: Waveform Audio File Format (audio/wav)
+
+## Backend Implementation
+- File extension detection for .mp3, .flac, .wav
+- MIME type mapping for audio formats
+- File indexing support for audio files
+- Metadata retrieval utility function (without database storage)
+  - File size, duration (future), format details
+  - Can be called on-demand for individual files
+  - Not stored in database to keep storage minimal
+
+## Player Features (To Be Implemented)
+- HTML5 audio element for playback
+- Play/Pause controls
+- Seek bar for navigation
+- Volume control
+- Playback speed control (0.5x, 1x, 1.5x, 2x)
+- Current time / Duration display
+- Loop option
+- Keyboard shortcuts (Space=play/pause, Arrow keys=seek)
+- Autoplay preference (off by default)
+
+## Thumbnail/Display Strategy
+- Display audio file icon or album art (if available)
+- Waveform visualization (optional, future enhancement)
+- Placeholder image for audio files in grid view
+- Metadata display: Title, Artist, Album (if available in tags)
+
+## Technical Considerations
+- Audio format validation and codec detection
+- Streaming vs full download for large files
+- Browser compatibility for various audio formats
+- Mobile device playback compatibility
+- Metadata extraction (ID3 tags for MP3, Vorbis comments for FLAC)
 
 # Future Considerations
 

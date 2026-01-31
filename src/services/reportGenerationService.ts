@@ -358,6 +358,11 @@ export class ReportGenerationService {
             color: #004085;
         }
 
+        .badge.audio {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         .file-size {
             color: #666;
             font-size: 0.85rem;
@@ -509,6 +514,12 @@ export class ReportGenerationService {
                     <div class="category-title">🎥 Videos: ${folder.filesByCategory.video}</div>
                     <ul class="extension-list">
                         ${this.buildExtensionList(folder.filesByExtension, [".mp4", ".webm", ".mov", ".avi", ".mkv"])}
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <div class="category-title">🎵 Audio: ${folder.filesByCategory.audio}</div>
+                    <ul class="extension-list">
+                        ${this.buildExtensionList(folder.filesByExtension, [".mp3", ".flac", ".wav"])}
                     </ul>
                 </div>
             </div>
