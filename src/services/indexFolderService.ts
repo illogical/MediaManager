@@ -84,6 +84,7 @@ export class IndexFolderService {
   ];
 
   private readonly imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
+  private readonly videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"];
   private readonly audioExtensions = [".mp3", ".flac", ".wav"];
 
   constructor(
@@ -110,6 +111,10 @@ export class IndexFolderService {
     if (this.audioExtensions.includes(ext)) {
       return "audio";
     }
+    if (this.videoExtensions.includes(ext)) {
+      return "video";
+    }
+    // Fallback for any other supported extensions
     return "video";
   }
 
