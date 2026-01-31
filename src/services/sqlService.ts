@@ -420,6 +420,43 @@ export class SqlService {
       logService.info(`Created index: ${index.name}`);
     }
   }
+
+  /**
+   * Delete all records from all database tables
+   * Order matters due to foreign key constraints
+   */
+  resetAllTables(): void {
+    logService.info("Resetting all database tables...");
+
+    const tablesToReset = [
+      "PlaylistMediaOrder",
+      "MediaTags",
+      "ViewHistory",
+      "MediaFiles",
+      "Tags",
+      "Playlists",
+      "Folders",
+      "RandomizationSessions",
+      "Config",
+    ];
+
+    const transaction = this.getDb().transaction(() => {
+      for (const table of tablesToReset) {
+        if (this.tableExists(table)) {
+          this.execute(`DELETE FROM ${table}`);
+          logService.info(`Deleted all records from ${table}`);
+        }
+      }
+    });
+
+    try {
+      transaction();
+      logService.info("All database tables reset successfully");
+    } catch (error) {
+      logService.error("Failed to reset database tables", error as Error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance with default database path

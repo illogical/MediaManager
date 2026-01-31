@@ -8,6 +8,7 @@
  * Flags:
  * --config=<path>  Specify custom config file path
  * --test           Run in test mode (analysis only, no database writes)
+ * --reset          Delete all records from all database tables before indexing
  */
 
 import { sqlService } from "../src/services/sqlService";
@@ -52,6 +53,7 @@ async function main() {
     const args = process.argv.slice(2);
     const configPathArg = args.find((arg) => arg.startsWith("--config="));
     const testMode = args.includes("--test");
+    const resetMode = args.includes("--reset");
 
     // Determine config file path
     const defaultConfigPath = path.join(process.cwd(), "data", "folders.json");
@@ -60,7 +62,9 @@ async function main() {
     logService.info("=== Folder Indexing Script ===");
     logService.info(`Config file: ${configPath}`);
     logService.info(`Mode: ${testMode ? "TEST (Analysis Only)" : "PRODUCTION (Full Indexing)"}`);
-
+    if (resetMode) {
+      logService.info(`Reset: ${resetMode ? "YES (Will delete all data)" : "NO"}`);
+    }
     // Load configuration
     const config = loadFolderConfig(configPath);
     logService.info(`Loaded ${config.folders.length} folder(s) from config`);
@@ -92,6 +96,13 @@ async function main() {
     // Ensure required tables exist
     sqlService.createAllTables();
     sqlService.createIndexes();
+
+    // Reset database if requested
+    if (resetMode) {
+      logService.info("\n🗑️  Resetting database (deleting all records)...");
+      sqlService.resetAllTables();
+      logService.info("✅ Database reset complete\n");
+    }
 
     // Initialize services
     const fileSystemService = new FileSystemService(sqlService);
