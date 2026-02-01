@@ -84,10 +84,7 @@ describe("RandomizerService", () => {
     });
 
     it("should return correctly formatted output with id and idx", () => {
-      const mediaFiles = [
-        createMockMedia({ id: 100 }),
-        createMockMedia({ id: 200 }),
-      ];
+      const mediaFiles = [createMockMedia({ id: 100 }), createMockMedia({ id: 200 })];
 
       const result = randomizerService.randomize(mediaFiles);
 
@@ -110,9 +107,7 @@ describe("RandomizerService", () => {
 
   describe("random algorithm", () => {
     it("should preserve all media items", () => {
-      const mediaFiles = Array.from({ length: 10 }, (_, i) =>
-        createMockMedia({ id: i + 1 })
-      );
+      const mediaFiles = Array.from({ length: 10 }, (_, i) => createMockMedia({ id: i + 1 }));
 
       const result = randomizerService.randomize(mediaFiles, "random");
       const ids = result.map((r) => r.id);
@@ -122,9 +117,7 @@ describe("RandomizerService", () => {
     });
 
     it("should produce different orders on multiple calls", () => {
-      const mediaFiles = Array.from({ length: 40 }, (_, i) =>
-        createMockMedia({ id: i + 1 })
-      );
+      const mediaFiles = Array.from({ length: 40 }, (_, i) => createMockMedia({ id: i + 1 }));
 
       const result1 = randomizerService.randomize(mediaFiles, "random");
       const result2 = randomizerService.randomize(mediaFiles, "random");
@@ -359,7 +352,7 @@ describe("RandomizerService", () => {
       const mediaFiles = Array.from({ length: 1000 }, (_, i) =>
         createMockMedia({
           id: i + 1,
-          last_viewed: i % 2 === 0 ? null : `2024-01-${String(i % 28 + 1).padStart(2, "0")}T00:00:00Z`,
+          last_viewed: i % 2 === 0 ? null : `2024-01-${String((i % 28) + 1).padStart(2, "0")}T00:00:00Z`,
         })
       );
 
@@ -376,7 +369,7 @@ describe("RandomizerService", () => {
         createMockMedia({
           id: i + 1,
           view_count: Math.floor(Math.random() * 100),
-          last_viewed: `2024-01-${String(i % 28 + 1).padStart(2, "0")}T00:00:00Z`,
+          last_viewed: `2024-01-${String((i % 28) + 1).padStart(2, "0")}T00:00:00Z`,
         })
       );
 
@@ -410,7 +403,7 @@ describe("RandomizerService", () => {
         createMockMedia({
           id: i + 1,
           view_count: Math.floor(Math.random() * 100),
-          last_viewed: `2024-01-${String(i % 28 + 1).padStart(2, "0")}T00:00:00Z`,
+          last_viewed: `2024-01-${String((i % 28) + 1).padStart(2, "0")}T00:00:00Z`,
         })
       );
 
@@ -426,7 +419,7 @@ describe("RandomizerService", () => {
       const mediaFiles = Array.from({ length: 1000 }, (_, i) =>
         createMockMedia({
           id: i + 1,
-          last_viewed: i % 3 === 0 ? null : `2024-01-${String(i % 28 + 1).padStart(2, "0")}T00:00:00Z`,
+          last_viewed: i % 3 === 0 ? null : `2024-01-${String((i % 28) + 1).padStart(2, "0")}T00:00:00Z`,
         })
       );
 
@@ -441,21 +434,14 @@ describe("RandomizerService", () => {
 
   describe("edge cases", () => {
     it("should handle media with null view_count", () => {
-      const mediaFiles = [
-        createMockMedia({ id: 1, view_count: 0 }),
-        createMockMedia({ id: 2, view_count: 0 }),
-      ];
+      const mediaFiles = [createMockMedia({ id: 1, view_count: 0 }), createMockMedia({ id: 2, view_count: 0 })];
 
       const result = randomizerService.randomize(mediaFiles, "least_viewed");
       expect(result).toHaveLength(2);
     });
 
     it("should handle media with identical properties", () => {
-      const mediaFiles = [
-        createMockMedia({ id: 1 }),
-        createMockMedia({ id: 2 }),
-        createMockMedia({ id: 3 }),
-      ];
+      const mediaFiles = [createMockMedia({ id: 1 }), createMockMedia({ id: 2 }), createMockMedia({ id: 3 })];
 
       const result = randomizerService.randomize(mediaFiles, "most_liked");
       expect(result).toHaveLength(3);

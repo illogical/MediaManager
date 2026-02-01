@@ -191,9 +191,7 @@ describe("Analysis and Reporting", () => {
     fs.writeFileSync(file1, "test");
 
     // Analyze folder
-    const report = await indexFolderService.analyzeFolders([
-      { name: "Test Folder", path: testDir, recursive: false },
-    ]);
+    const report = await indexFolderService.analyzeFolders([{ name: "Test Folder", path: testDir, recursive: false }]);
 
     // Generate JSON report
     const jsonPath = reportService.generateJsonReport(report);
@@ -214,9 +212,7 @@ describe("Analysis and Reporting", () => {
     fs.writeFileSync(file1, "test");
 
     // Analyze folder
-    const report = await indexFolderService.analyzeFolders([
-      { name: "Test Folder", path: testDir, recursive: false },
-    ]);
+    const report = await indexFolderService.analyzeFolders([{ name: "Test Folder", path: testDir, recursive: false }]);
 
     // Generate reports
     const jsonPath = reportService.generateJsonReport(report);

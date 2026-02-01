@@ -5,12 +5,85 @@
 import { sqlService } from "./sqlService";
 import { logService } from "./logService";
 import type { MediaFile, MediaFileWithTags, MediaListQuery, Tag } from "../api/schemas";
+import * as fs from "fs";
+import * as path from "path";
+
+/**
+ * Interface for audio file metadata (utility function, not stored in database)
+ */
+export interface AudioFileMetadata {
+  filePath: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  extension: string;
+  createdDate: string | null;
+  modifiedDate: string | null;
+  exists: boolean;
+}
 
 /**
  * Normalize a tag name (trim whitespace, convert to lowercase for case-insensitive comparison)
  */
 export function normalizeTagName(tagName: string): string {
   return tagName.trim().toLowerCase();
+}
+
+/**
+ * Get metadata for an audio file (utility function, does not store in database)
+ * This function extracts basic file system information for audio files
+ * @param filePath - Absolute path to the audio file
+ * @returns AudioFileMetadata object with file information
+ */
+export function getAudioFileMetadata(filePath: string): AudioFileMetadata {
+  const absolutePath = path.resolve(filePath);
+  const ext = path.extname(absolutePath).toLowerCase();
+
+  // Validate that it's an audio file
+  const audioExtensions = [".mp3", ".flac", ".wav"];
+  if (!audioExtensions.includes(ext)) {
+    throw new Error(`File is not a supported audio format: ${ext}`);
+  }
+
+  // Check if file exists
+  if (!fs.existsSync(absolutePath)) {
+    return {
+      filePath: absolutePath,
+      fileName: path.basename(absolutePath),
+      fileSize: 0,
+      mimeType: getMimeTypeForAudio(ext),
+      extension: ext,
+      createdDate: null,
+      modifiedDate: null,
+      exists: false,
+    };
+  }
+
+  // Get file stats
+  const stats = fs.statSync(absolutePath);
+
+  return {
+    filePath: absolutePath,
+    fileName: path.basename(absolutePath),
+    fileSize: stats.size,
+    mimeType: getMimeTypeForAudio(ext),
+    extension: ext,
+    createdDate: stats.birthtime.toISOString(),
+    modifiedDate: stats.mtime.toISOString(),
+    exists: true,
+  };
+}
+
+/**
+ * Get MIME type for audio file extension
+ */
+function getMimeTypeForAudio(ext: string): string {
+  const mimeTypes: Record<string, string> = {
+    ".mp3": "audio/mpeg",
+    ".flac": "audio/flac",
+    ".wav": "audio/wav",
+  };
+  return mimeTypes[ext] || "application/octet-stream";
 }
 
 export class MediaService {
@@ -309,7 +382,7 @@ export class MediaService {
 
       if (existing) {
         logService.warn(`Tag '${tagName}' already applied to media ${mediaId}`);
-        throw new Error(`Tag already applied to media`);
+        throw new Error("Tag already applied to media");
       }
 
       // Add tag to media
@@ -385,10 +458,7 @@ export class MediaService {
       const normalizedName = normalizeTagName(name);
 
       // Check if tag already exists (case-insensitive)
-      const existing = sqlService.queryOne<Tag>(
-        "SELECT * FROM Tags WHERE LOWER(name) = ?",
-        [normalizedName]
-      );
+      const existing = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE LOWER(name) = ?", [normalizedName]);
 
       if (existing) {
         logService.warn(`Tag already exists: ${existing.name}`);

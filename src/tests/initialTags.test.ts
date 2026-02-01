@@ -39,21 +39,15 @@ describe("Initial Tags Feature", () => {
 
   const createTag = (name: string): Tag => {
     const normalized = name.trim().toLowerCase();
-    const existing = sqlService.queryOne<Tag>(
-      "SELECT * FROM Tags WHERE LOWER(name) = ?",
-      [normalized]
-    );
+    const existing = sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE LOWER(name) = ?", [normalized]);
     if (existing) return existing;
-    
+
     const result = sqlService.execute("INSERT INTO Tags (name) VALUES (?)", [normalized]);
     return sqlService.queryOne<Tag>("SELECT * FROM Tags WHERE id = ?", [result.lastInsertRowid])!;
   };
 
   const addTagToMedia = (mediaId: number, tagId: number): void => {
-    sqlService.execute(
-      "INSERT OR IGNORE INTO MediaTags (media_id, tag_id) VALUES (?, ?)",
-      [mediaId, tagId]
-    );
+    sqlService.execute("INSERT OR IGNORE INTO MediaTags (media_id, tag_id) VALUES (?, ?)", [mediaId, tagId]);
   };
 
   beforeEach(() => {

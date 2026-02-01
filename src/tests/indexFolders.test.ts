@@ -155,9 +155,9 @@ describe("indexFolders script", () => {
     // Get files in DB
     const dbFiles = new Set(
       sqlService
-        .queryAll<{ file_path: string }>("SELECT file_path FROM MediaFiles WHERE folder_path = ? AND is_deleted = 0", [
-          testDir,
-        ])
+        .queryAll<{
+          file_path: string;
+        }>("SELECT file_path FROM MediaFiles WHERE folder_path = ? AND is_deleted = 0", [testDir])
         .map((f) => f.file_path)
     );
 

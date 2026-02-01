@@ -39,6 +39,9 @@ export class FileSystemService {
     ".mov",
     ".avi",
     ".mkv",
+    ".mp3",
+    ".flac",
+    ".wav",
   ];
 
   // Batch size for database inserts
@@ -79,6 +82,9 @@ export class FileSystemService {
       ".mov": "video/quicktime",
       ".avi": "video/x-msvideo",
       ".mkv": "video/x-matroska",
+      ".mp3": "audio/mpeg",
+      ".flac": "audio/flac",
+      ".wav": "audio/wav",
     };
     return mimeTypes[ext] || "application/octet-stream";
   }
